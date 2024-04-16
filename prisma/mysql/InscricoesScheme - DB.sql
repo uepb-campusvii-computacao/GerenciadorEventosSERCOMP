@@ -11,15 +11,16 @@ CREATE TABLE IF NOT EXISTS tb_usuario (
     nome_cracha VARCHAR(255) UNIQUE NOT NULL,
     instituicao VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    senha VARCHAR(80),  --BCRYPT
+    senha VARCHAR(80),
+    active BOOLEAN DEFAULT TRUE,
     perfil VARCHAR(30) NOT NULL CHECK (perfil IN ('ADMIN', 'PARTICIPANTE'))
 );
 
 CREATE TABLE IF NOT EXISTS tb_evento (
     uuid_evento BINARY(16) PRIMARY KEY,
-    uuid_user BINARY(16) NOT NULL,
+    uuid_user_owner BINARY(16) NOT NULL,
     nome VARCHAR(255) NOT NULL,
-    FOREIGN KEY (uuid_user) REFERENCES tb_usuario(uuid_user)
+    FOREIGN KEY (uuid_user_owner) REFERENCES tb_usuario(uuid_user)
 );
 
 CREATE TABLE IF NOT EXISTS tb_lote (
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS tb_atividade (
     FOREIGN KEY (uuid_evento) REFERENCES tb_evento(uuid_evento)
 );
 
-CREATE TABLE IF NOT EXISTS tb_atividade_participante (
+CREATE TABLE IF NOT EXISTS tb_user_atividade (
     uuid_user BINARY(16) NOT NULL,
     uuid_atividade BINARY(16) NOT NULL,
     PRIMARY KEY (uuid_user, uuid_atividade),
@@ -48,22 +49,14 @@ CREATE TABLE IF NOT EXISTS tb_atividade_participante (
     FOREIGN KEY (uuid_atividade) REFERENCES tb_atividade(uuid_atividade)
 );
 
-CREATE TABLE IF NOT EXISTS tb_inscricao (
-    uuid_inscricao BINARY(16) PRIMARY KEY,
-    uuid_evento BINARY(16) NOT NULL,
-    preco DECIMAL(10, 2) NOT NULL,
-    nome VARCHAR(255) NOT NULL,
-    descricao TEXT,
-    FOREIGN KEY (uuid_evento) REFERENCES tb_evento(uuid_evento)
-);
-
 CREATE TABLE IF NOT EXISTS tb_user_inscricao (
-    uuid_inscricao BINARY(16) NOT NULL,
     uuid_user BINARY(16) NOT NULL,
+    uuid_lote BINARY(16) NOT NULL,
     id_payment_mercado_pago VARCHAR(20) NOT NULL,
+    qrcode_base64 TEXT NOT NULL,
+    expiration_datetime DATETIME NOT NULL,
     status_pagamento VARCHAR(30) NOT NULL CHECK (status_pagamento IN ('PENDENTE', 'REALIZADO', 'EXPIRADO')),
-    PRIMARY KEY (uuid_inscricao, uuid_user),
-    FOREIGN KEY (uuid_inscricao) REFERENCES tb_inscricao(uuid_inscricao),
-    FOREIGN KEY (uuid_user) REFERENCES tb_usuario(uuid_user)
+    PRIMARY KEY (uuid_lote, uuid_user),
+    FOREIGN KEY (uuid_user) REFERENCES tb_usuario(uuid_user),
+    FOREIGN KEY (uuid_lote) REFERENCES tb_lote(uuid_lote)
 );
-
