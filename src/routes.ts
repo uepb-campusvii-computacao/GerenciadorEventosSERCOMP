@@ -5,7 +5,7 @@ import { getPayment } from "./services/payments/get_payment";
 const routes = Router();
 
 
-routes.get("/", createPayment)
+routes.get("/:user_id", createPayment)
 routes.get("/:payment_id", getPayment)
 
 export default routes;
