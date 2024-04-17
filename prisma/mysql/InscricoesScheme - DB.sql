@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS tb_atividade (
 CREATE TABLE IF NOT EXISTS tb_user_atividade (
     uuid_user BINARY(16) NOT NULL,
     uuid_atividade BINARY(16) NOT NULL,
+    presenca BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (uuid_user, uuid_atividade),
     FOREIGN KEY (uuid_user) REFERENCES tb_usuario(uuid_user),
     FOREIGN KEY (uuid_atividade) REFERENCES tb_atividade(uuid_atividade)
