@@ -16,7 +16,7 @@ datasource db {
 model Usuario {
   uuid_user     String          @id @default(uuid())
   nome          String          
-  nome_cracha   String          @unique
+  nome_cracha   String          
   instituicao   String
   email         String          @unique
   senha         String?
