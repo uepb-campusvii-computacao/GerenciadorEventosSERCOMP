@@ -14,90 +14,82 @@ datasource db {
 }
 
 model Usuario {
-  uuid_user               String                  @id @default(uuid())
-  nome                    String
-  nome_cracha             String                  @unique
-  instituicao             String
-  email                   String                  @unique
-  senha                   String?
-  perfil                  String                  @default("PARTICIPANTE")
-  eventos                 Evento[]
-  Atividade               Atividade?              @relation(fields: [atividadeUuid_atividade], references: [uuid_atividade])
-  atividadeUuid_atividade String?
-  UsuarioInscricao        UsuarioInscricao[]
-  AtividadeParticipante   AtividadeParticipante[]
+  uuid_user     String          @id @default(uuid())
+  nome          String
+  nome_cracha   String          @unique
+  instituicao   String
+  email         String          @unique
+  senha         String?
+  active        Boolean         @default(true)
+  perfil        Perfil          @default(PARTICIPANTE)
+  Evento        Evento[]
+  UserAtividade UserAtividade[]
+  UserInscricao UserInscricao[]
 
   @@map("tb_usuario")
 }
 
 model Evento {
-  uuid_evento String      @id @default(uuid())
-  uuid_user   String
-  nome        String
-  usuario     Usuario     @relation(fields: [uuid_user], references: [uuid_user])
-  lotes       Lote[]
-  atividades  Atividade[]
-  Inscricao   Inscricao[]
+  uuid_evento     String      @id @default(uuid())
+  uuid_user_owner String
+  nome            String
+  usuario         Usuario     @relation(fields: [uuid_user_owner], references: [uuid_user])
+  Lote            Lote[]
+  Atividade       Atividade[]
 
   @@map("tb_evento")
 }
 
 model Lote {
-  uuid_lote   String  @id @default(uuid())
-  uuid_evento String
-  preco       Float
-  nome        String
-  descricao   String?
-  evento      Evento  @relation(fields: [uuid_evento], references: [uuid_evento])
+  uuid_lote     String          @id @default(uuid())
+  uuid_evento   String
+  preco         Float
+  nome          String
+  descricao     String?
+  evento        Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
+  UserInscricao UserInscricao[]
 
   @@map("tb_lote")
 }
 
 model Atividade {
-  uuid_atividade        String                  @id @default(uuid())
-  uuid_evento           String
-  nome                  String
-  descricao             String?
-  max_participants      Int?
-  evento                Evento                  @relation(fields: [uuid_evento], references: [uuid_evento])
-  participantes         Usuario[]
-  AtividadeParticipante AtividadeParticipante[]
+  uuid_atividade   String          @id @default(uuid())
+  uuid_evento      String
+  nome             String
+  descricao        String?
+  max_participants Int?
+  evento           Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
+  UserAtividade    UserAtividade[]
 
   @@map("tb_atividade")
 }
 
-model Inscricao {
-  uuid_inscricao     String             @id @default(uuid())
-  uuid_evento        String
-  preco              Float
-  nome               String
-  descricao          String?
-  evento             Evento             @relation(fields: [uuid_evento], references: [uuid_evento])
-  usuarios_inscritos UsuarioInscricao[]
-
-  @@map("tb_inscricao")
-}
-
-model UsuarioInscricao {
-  uuid_inscricao          String
-  uuid_user               String
-  id_payment_mercado_pago String
-  status_pagamento        StatusPagamento @default(PENDENTE)
-  inscricao               Inscricao       @relation(fields: [uuid_inscricao], references: [uuid_inscricao])
-  usuario                 Usuario         @relation(fields: [uuid_user], references: [uuid_user])
-
-  @@id([uuid_inscricao, uuid_user])
-  @@map("tb_usuario_inscricao")
-}
-
-model AtividadeParticipante {
+model UserAtividade {
   uuid_user      String
   uuid_atividade String
-  usuario        Usuario   @relation(fields: [uuid_user], references: [uuid_user])
+  user           Usuario   @relation(fields: [uuid_user], references: [uuid_user])
   atividade      Atividade @relation(fields: [uuid_atividade], references: [uuid_atividade])
 
   @@id([uuid_user, uuid_atividade])
-  @@map("tb_atividade_participante")
+  @@map("tb_usuario_atividade")
+}
+
+model UserInscricao {
+  uuid_user               String
+  uuid_lote               String
+  id_payment_mercado_pago String
+  expiration_datetime     DateTime
+  status_pagamento        StatusPagamento @default(PENDENTE)
+  usuario                 Usuario         @relation(fields: [uuid_user], references: [uuid_user])
+  lote                    Lote            @relation(fields: [uuid_lote], references: [uuid_lote])
+
+  @@id([uuid_lote, uuid_user])
+  @@map("tb_usuario_inscricao")
+}
+
+enum Perfil {
+  ADMIN
+  PARTICIPANTE
 }
 
 enum StatusPagamento {
