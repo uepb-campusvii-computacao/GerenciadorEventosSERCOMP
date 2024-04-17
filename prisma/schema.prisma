@@ -15,7 +15,7 @@ datasource db {
 
 model Usuario {
   uuid_user     String          @id @default(uuid())
-  nome          String
+  nome          String          
   nome_cracha   String          @unique
   instituicao   String
   email         String          @unique
@@ -67,6 +67,7 @@ model Atividade {
 model UserAtividade {
   uuid_user      String
   uuid_atividade String
+  presenca       Boolean   @default(false)
   user           Usuario   @relation(fields: [uuid_user], references: [uuid_user])
   atividade      Atividade @relation(fields: [uuid_atividade], references: [uuid_atividade])
 
