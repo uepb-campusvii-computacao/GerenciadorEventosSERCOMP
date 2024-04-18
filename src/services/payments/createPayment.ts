@@ -17,7 +17,6 @@ export async function createPayment(user_id: string, lote_id: string) {
       description: "Compra de ingresso",
       payment_method_id: "pix",
       payer: {
-        id: user.uuid_user,
         email: user.email,
       },
     };

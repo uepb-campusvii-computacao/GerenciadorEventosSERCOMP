@@ -3,6 +3,8 @@ import { RegisterUserRequestParams } from "../interfaces/registerUserRequestPara
 import { createUser } from "../repositories/userRepository";
 import { createUserAtividade } from "../repositories/userAtividadeRepository";
 import { findActivityById } from "../repositories/activityRepository";
+import { createPayment } from "../services/payments/createPayment";
+import { getPayment } from "../services/payments/getPayment";
 
 export async function registerUser(req: Request, res: Response) {
   try {
@@ -14,7 +16,9 @@ export async function registerUser(req: Request, res: Response) {
       minicurso_id,
       oficina_id,
       workshop_id,
-    }: RegisterUserRequestParams = req.body.params;
+    }: RegisterUserRequestParams = req.body;
+
+    const { lote_id } = req.params;
 
     const use_id = await createUser({ nome, nome_cracha, email, instituicao });
 
@@ -36,11 +40,22 @@ export async function registerUser(req: Request, res: Response) {
       }
     }
 
-   
-    return res.status(200).json({
-      message: "cadastrado nas atividades"
-    });
+    const user = await createPayment(use_id, lote_id);
+
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(200).json(error);
+    res.status(400).json(error);
+  }
+}
+
+export async function getUserInscricao(req: Request, res: Response){
+  try {
+    const { payment_id } = req.params;
+
+    const payment = await getPayment(payment_id);
+
+    res.status(200).json(payment)
+  } catch (error) {
+    res.status(400).send(error)
   }
 }

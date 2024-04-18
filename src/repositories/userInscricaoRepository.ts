@@ -17,3 +17,13 @@ export async function createUserInscricao(
 
     return user_inscricao;
 }
+
+export async function findUserInscricaoByMercadoPagoId(id_payment_mercado_pago: string){
+    const user_inscricao = await prisma.userInscricao.findFirst({
+        where: {
+            id_payment_mercado_pago
+        }
+    });
+
+    return user_inscricao;
+} 

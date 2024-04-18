@@ -1,12 +1,14 @@
 import { Router } from "express";
-import { createPayment } from "./services/payments/createPayment";
-import { getPayment } from "./services/payments/get_payment";
-import { registerUser } from "./controllers/userController";
+import { getUserInscricao, registerUser } from "./controllers/userController";
+import { getActivitiesInEvent } from "./controllers/eventController";
 
 const routes = Router();
 
 
-routes.post("/register", registerUser);
-routes.get("/:payment_id", getPayment)
+routes.post("/register/:lote_id", registerUser);
+routes.get("/user/payment/:payment_id", getUserInscricao);
+
+routes.get("/events/:event_id/activities", getActivitiesInEvent);
+
 
 export default routes;
