@@ -1,10 +1,40 @@
 import { Request, Response } from "express";
 import { RegisterUserRequestParams } from "../interfaces/registerUserRequestParam";
-import { createUser } from "../repositories/userRepository";
+import { createUser, findUserByEmail } from "../repositories/userRepository";
 import { createUserAtividade } from "../repositories/userAtividadeRepository";
 import { findActivityById } from "../repositories/activityRepository";
 import { createPayment } from "../services/payments/createPayment";
 import { getPayment } from "../services/payments/getPayment";
+import { UserLoginParams } from "../interfaces/userLoginParams";
+import jsonwebtoken from "jsonwebtoken";
+
+export async function loginUser(req: Request, res: Response) {
+  const params: UserLoginParams = req.body;
+
+  const { email, senha } = params;
+
+  const userExists = await findUserByEmail(email);
+
+  if (!userExists) {
+    return res.status(401).send("email não encontrado");
+  }
+
+  if (userExists.senha === senha) {
+    return res.status(401).send("Senha inválida!");
+  }
+
+  const token = jsonwebtoken.sign(
+    {
+      id: userExists.uuid_user,
+    },
+    String(process.env.SECRET),
+    {
+      expiresIn: "4h",
+    }
+  );
+
+  return res.status(200).json({ token: token });
+}
 
 export async function registerUser(req: Request, res: Response) {
   try {
