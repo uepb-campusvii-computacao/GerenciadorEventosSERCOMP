@@ -15,8 +15,8 @@ datasource db {
 
 model Usuario {
   uuid_user     String          @id @default(uuid())
-  nome          String          
-  nome_cracha   String          @unique
+  nome          String
+  nome_cracha   String
   instituicao   String
   email         String          @unique
   senha         String?
@@ -58,6 +58,7 @@ model Atividade {
   nome             String
   descricao        String?
   max_participants Int?
+  tipo_atividade   TipoAtividade   @default(MINICURSO)
   evento           Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
   UserAtividade    UserAtividade[]
 
@@ -91,6 +92,13 @@ model UserInscricao {
 enum Perfil {
   ADMIN
   PARTICIPANTE
+}
+
+enum TipoAtividade {
+  MINICURSO
+  WORKSHOP
+  OFICINA
+  PALESTRA
 }
 
 enum StatusPagamento {
