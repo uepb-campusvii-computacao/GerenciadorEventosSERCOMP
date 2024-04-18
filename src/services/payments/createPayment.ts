@@ -35,3 +35,4 @@ export async function createPayment(user_id: string, lote_id: string) {
 
     return userInscricao;
 }
+
