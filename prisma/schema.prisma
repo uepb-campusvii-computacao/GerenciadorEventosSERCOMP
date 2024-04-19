@@ -22,9 +22,9 @@ model Usuario {
   senha         String?
   active        Boolean         @default(true)
   perfil        Perfil          @default(PARTICIPANTE)
-  Evento        Evento[]
-  UserAtividade UserAtividade[]
-  UserInscricao UserInscricao[]
+  evento        Evento[]
+  userAtividade UserAtividade[]
+  userInscricao UserInscricao[]
 
   @@map("tb_usuario")
 }
@@ -34,8 +34,8 @@ model Evento {
   uuid_user_owner String
   nome            String
   usuario         Usuario     @relation(fields: [uuid_user_owner], references: [uuid_user])
-  Lote            Lote[]
-  Atividade       Atividade[]
+  lote            Lote[]
+  atividade       Atividade[]
 
   @@map("tb_evento")
 }
@@ -47,7 +47,7 @@ model Lote {
   nome          String
   descricao     String?
   evento        Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
-  UserInscricao UserInscricao[]
+  userInscricao UserInscricao[]
 
   @@map("tb_lote")
 }
@@ -60,7 +60,7 @@ model Atividade {
   max_participants Int?
   tipo_atividade   TipoAtividade   @default(MINICURSO)
   evento           Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
-  UserAtividade    UserAtividade[]
+  userAtividade    UserAtividade[]
 
   @@map("tb_atividade")
 }

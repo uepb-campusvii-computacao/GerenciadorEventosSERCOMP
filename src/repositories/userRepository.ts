@@ -1,17 +1,23 @@
 import { CreateUserParams } from "../interfaces/createUserParams";
 import { prisma } from "../lib/prisma";
 
+export async function findUserByEmail(email: string){
+  const user = await prisma.usuario.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  return user;
+}
+
 export async function createUser({
   nome,
   nome_cracha,
   email,
   instituicao,
 }: CreateUserParams) {
-  const user_exits = await prisma.usuario.findUnique({
-    where: {
-      email,
-    },
-  });
+  const user_exits = await findUserByEmail(email);
 
   if (user_exits) {
     throw new Error("Email já cadastrado!");

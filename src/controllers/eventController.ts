@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { findAllEvents } from "../repositories/eventRepository";
+import { findAllActivitiesInEvent, findAllEvents } from "../repositories/eventRepository";
 import { findActivitiesInEvent } from "../repositories/activityRepository";
+import { findAllSubscribersInEvent } from "../repositories/userAtividadeRepository";
 
 export async function getAllEvents(req: Request, res: Response){
     const all_events = await findAllEvents();
@@ -24,4 +25,35 @@ export async function getActivitiesInEvent(req: Request, res: Response){
             palestras
         }
     })
+}
+
+export async function getAllSubscribersInEvent(req: Request, res: Response){
+    const { id_evento } = req.params;
+
+    const all_subscribers = await findAllSubscribersInEvent(id_evento);
+
+    if(!all_subscribers){
+        return res.status(400).send("Evento não encontrado")
+    }
+
+    return res.status(200).json(
+        all_subscribers.map((subscriber) => (
+            {
+                uuid_user: subscriber.uuid_user,
+                ...subscriber.user
+            }
+        ))
+    );
+}
+
+export async function getAllActivitiesInEvent(req: Request, res: Response){
+    const { id_evento } = req.params;
+
+    const all_activities = await findAllActivitiesInEvent(id_evento);
+
+    if(!all_activities){
+        return res.status(400).send("Evento não encontrado")
+    }
+
+    return res.status(200).json(all_activities.atividade);
 }
