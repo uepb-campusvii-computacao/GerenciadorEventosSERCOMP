@@ -1,27 +1,44 @@
 import { prisma } from "../lib/prisma";
 
-export async function findAllEvents(){
-    const response = await prisma.evento.findMany();
+export async function findAllEvents() {
+  const response = await prisma.evento.findMany();
 
-    return response;
+  return response;
 }
 
-export async function findAllActivitiesInEvent(uuid_evento: string){
-    const activities = await prisma.evento.findFirst({
-        where: {
-            uuid_evento
-        }, 
+export async function getEventoPrecoById(uuid_evento: string) {
+  const evento = await prisma.evento.findUniqueOrThrow({
+    where: {
+       uuid_evento
+    },
+    select: {
+      lote: {
         select: {
-            atividade: {
-                select: {
-                    uuid_atividade: true,
-                    nome: true,
-                    max_participants: true,
-                    tipo_atividade: true,
-                }
-            }
+          preco: true
         }
-    })
+      }
+    }
+  });
 
-    return activities;
+  return evento.lote;
+}
+
+export async function findAllActivitiesInEvent(uuid_evento: string) {
+  const activities = await prisma.evento.findFirst({
+    where: {
+      uuid_evento,
+    },
+    select: {
+      atividade: {
+        select: {
+          uuid_atividade: true,
+          nome: true,
+          max_participants: true,
+          tipo_atividade: true,
+        },
+      },
+    },
+  });
+
+  return activities;
 }

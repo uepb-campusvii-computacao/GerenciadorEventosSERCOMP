@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { RegisterUserRequestParams } from "../interfaces/registerUserRequestParam";
 import { createUser, findUserByEmail } from "../repositories/userRepository";
-import { createUserAtividade } from "../repositories/userAtividadeRepository";
+import { createUserAtividade, findAllSubscribersInActivity } from "../repositories/userAtividadeRepository";
 import { findActivityById } from "../repositories/activityRepository";
 import { createPayment } from "../services/payments/createPayment";
 import { getPayment } from "../services/payments/getPayment";
@@ -56,16 +56,20 @@ export async function registerUser(req: Request, res: Response) {
       atividades?.workshop_id,
     ];
 
-    if (activities_ids.length == 0) {
-      throw new Error("É necessário se matricula em pelo menos uma atividade");
-    }
-
     for (const uuid_atividade of activities_ids) {
       if (uuid_atividade) {
-        const activity_exits = await findActivityById(uuid_atividade);
+        const activity_exists = await findActivityById(uuid_atividade);
 
-        if (!activity_exits) {
+        if (!activity_exists) {
           throw new Error("UUID inválido!");
+        }
+
+        let max_participants = Number(activity_exists.max_participants);
+
+        let total_participants = (await findAllSubscribersInActivity(uuid_atividade)).length
+
+        if(total_participants >= max_participants){
+          throw new Error(`A atividade ${activity_exists.nome} já está completa`)
         }
 
         await createUserAtividade(use_id, uuid_atividade);

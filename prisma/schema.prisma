@@ -79,6 +79,7 @@ model UserAtividade {
 model UserInscricao {
   uuid_user               String
   uuid_lote               String
+  credenciamento          Boolean         @default(false)
   id_payment_mercado_pago String
   expiration_datetime     DateTime
   status_pagamento        StatusPagamento @default(PENDENTE)

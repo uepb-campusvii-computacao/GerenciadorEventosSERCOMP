@@ -1,3 +1,4 @@
+import { UpdateUserParams } from "../interfaces/updateUserParams";
 import { prisma } from "../lib/prisma";
 
 export async function createUserAtividade(
@@ -12,26 +13,31 @@ export async function createUserAtividade(
   });
 }
 
-export async function findAllSubscribersInEvent(event_id: string) {
-  const all_subscribers = await prisma.userAtividade.findMany({
+export async function findUserAtividadeById(uuid_atividade: string, uuid_user: string) {
+  const activity = await prisma.userAtividade.findUnique({
     where: {
-      atividade: {
-        uuid_evento: event_id,
-      },
-    },
-    select: {
-      uuid_user: true,
-      user: {
-        select: {
-          nome: true,
-          email: true,
-          nome_cracha: true,
-        },
-      },
-    },
+      uuid_user_uuid_atividade: {
+        uuid_atividade,
+        uuid_user
+      }
+    }
   });
 
-  return all_subscribers;
+  return activity;
+}
+
+export async function changeActivity(uuid_user: string, uuid_atividade_atual: string, uuid_atividade_nova: string){
+  await prisma.userAtividade.update({
+    where: {
+      uuid_user_uuid_atividade: {
+        uuid_atividade: uuid_atividade_atual,
+        uuid_user
+      }
+    },
+    data: {
+      uuid_atividade: uuid_atividade_nova,
+    }
+  })
 }
 
 export async function findAllSubscribersInActivity(uuid_atividade: string) {
@@ -53,4 +59,18 @@ export async function findAllSubscribersInActivity(uuid_atividade: string) {
   });
 
   return subscribers;
+}
+
+export async function changePresencaValueInActivity(uuid_atividade: string, uuid_user: string, presenca_value: boolean){
+  await prisma.userAtividade.update({
+    where: {
+      uuid_user_uuid_atividade: {
+        uuid_atividade,
+        uuid_user
+      }
+    },
+    data: {
+      presenca: presenca_value
+    }
+  })
 }

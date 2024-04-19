@@ -6,7 +6,7 @@ export interface RegisterUserRequestParams {
     atividades?: AtividadesParams;
 };
 
-interface AtividadesParams{
+export interface AtividadesParams{
     minicurso_id?: string;
     workshop_id?: string;
     oficina_id?: string; 
