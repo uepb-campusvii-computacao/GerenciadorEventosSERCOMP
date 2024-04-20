@@ -13,6 +13,46 @@ export async function createUserAtividade(
   });
 }
 
+export async function changeUserAtividade(uuid_atividade_atual: string, uuid_atividade_nova: string, uuid_user: string){
+  await prisma.userAtividade.updateMany({
+    where: {
+      uuid_user,
+      uuid_atividade: uuid_atividade_atual
+    },
+    data: {
+      uuid_atividade: uuid_atividade_nova
+    }
+  })
+
+  console.log("Atualizada com sucesso!")
+}
+
+export async function findActivitiesByUserId(uuid_user: string){
+  const response = await prisma.userAtividade.findMany({
+    where: {
+      uuid_user
+    },
+    select: {
+      atividade: {
+        select: {
+          uuid_atividade: true,
+          nome: true,
+          tipo_atividade: true,
+        }
+      }
+    },
+    orderBy: {
+      atividade: {
+        tipo_atividade: "asc"
+      }
+    }
+  });
+
+  return response.map(item => (
+    item.atividade
+  ))
+}
+
 export async function findUserAtividadeById(uuid_atividade: string, uuid_user: string) {
   const activity = await prisma.userAtividade.findUnique({
     where: {

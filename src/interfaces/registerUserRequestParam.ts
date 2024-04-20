@@ -1,3 +1,5 @@
+import { AtividadesParams } from "./atividadeParams";
+
 export interface RegisterUserRequestParams {
     nome: string;
     email: string;
@@ -5,9 +7,3 @@ export interface RegisterUserRequestParams {
     instituicao: string;
     atividades?: AtividadesParams;
 };
-
-export interface AtividadesParams{
-    minicurso_id?: string;
-    workshop_id?: string;
-    oficina_id?: string; 
-}

@@ -3,6 +3,7 @@ import {
   findAllActivitiesInEvent,
   findAllEvents,
   getEventoPrecoById,
+  getLoteByEventId,
 } from "../repositories/eventRepository";
 import { findActivitiesInEvent } from "../repositories/activityRepository";
 import { changeCredenciamentoValue, findAllSubscribersInEvent, findAllUserInEventByStatusPagamento, findUserInscricaoById } from "../repositories/userInscricaoRepository";
@@ -59,7 +60,11 @@ export async function getAllSubscribersInEvent(req: Request, res: Response) {
 
 export async function changeEventCredenciamentoValue(req: Request, res: Response) {
   try {
-    const { user_id, lote_id } = req.params
+    const { event_id, user_id } = req.params
+
+    const lote = await getLoteByEventId(event_id);
+
+    const lote_id = lote!.uuid_lote;
 
     const user_inscricao = await findUserInscricaoById(user_id, lote_id);
 
@@ -67,7 +72,7 @@ export async function changeEventCredenciamentoValue(req: Request, res: Response
 
     return res.status(200).send("Valor Alterado com sucesso!")
   } catch (error) {
-    return res.status(400).send(error)
+    return res.status(400).send("Informações inválidas")
   }
 }
 

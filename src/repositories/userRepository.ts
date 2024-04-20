@@ -2,7 +2,7 @@ import { CreateUserParams } from "../interfaces/createUserParams";
 import { UpdateUserParams } from "../interfaces/updateUserParams";
 import { prisma } from "../lib/prisma";
 
-export async function findUserByEmail(email: string){
+export async function findUserByEmail(email: string) {
   const user = await prisma.usuario.findUnique({
     where: {
       email,
@@ -36,14 +36,13 @@ export async function createUser({
   return new_user.uuid_user;
 }
 
-
-export async function updateUser({
-  uuid_user,
-  nome,
-  email,
-  nome_cracha,
-  instituicao
-}: UpdateUserParams) {
+export async function updateUser(
+  uuid_user: string,
+  nome: string,
+  email: string,
+  nome_cracha: string,
+  instituicao: string
+) {
   const user_exists = await findUserByEmail(email);
 
   if (user_exists && user_exists.uuid_user != uuid_user) {
@@ -52,7 +51,7 @@ export async function updateUser({
 
   const user = await prisma.usuario.update({
     where: {
-      uuid_user
+      uuid_user,
     },
     data: {
       nome,

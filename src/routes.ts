@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { getUserInscricao, loginUser, registerUser } from "./controllers/userController";
-import { getActivitiesInEvent, getAllActivitiesInEvent, getAllSubscribersInEvent, getFinancialInformation } from "./controllers/eventController";
+import { getUserInLote, getUserInscricao, loginUser, registerUser, updatePaymentStatus, updateUserInformations } from "./controllers/userController";
+import { changeEventCredenciamentoValue, getActivitiesInEvent, getAllActivitiesInEvent, getAllSubscribersInEvent, getFinancialInformation } from "./controllers/eventController";
 import { checkToken } from "./lib/ensureAuthenticate";
-import { changeActivityPresencaValue, getSubscribersInActivity } from "./controllers/activityController";
+import { changeActivityPresencaValue, getSubscribersInActivity, upadateUserActivity } from "./controllers/activityController";
 
 const routes = Router();
 
@@ -15,16 +15,24 @@ routes.get("/user/payment/:payment_id", getUserInscricao);
 
 routes.get("/events/:event_id/activities", getActivitiesInEvent);
 
+routes.get("/lote/:lote_id/inscricoes/:user_id", getUserInLote)
+
 routes.get("/admin/events/:event_id/dashboard", checkToken, getFinancialInformation);
 
 routes.get("/admin/events/:id_evento/inscricoes", checkToken, getAllSubscribersInEvent);
 
+routes.put("/admin/events/:id_evento/inscricoes/credenciamento/:user_id", checkToken, changeEventCredenciamentoValue);
+
 routes.get("/admin/events/:id_evento/atividades", checkToken, getAllActivitiesInEvent);
+
+routes.put("/admin/usuario/:user_id/atividades/troca", checkToken, upadateUserActivity);
+
+routes.put("/admin/usuario/:user_id", checkToken, updateUserInformations);
+
+routes.put("/admin/lote/:lote_id/inscricoes/:user_id", checkToken, updatePaymentStatus);
 
 routes.get("/admin/atividades/:id_atividade/inscricoes", checkToken, getSubscribersInActivity);
 
 routes.put("/admin/atividades/:id_atividade/inscricoes/:user_id/frequencia", checkToken, changeActivityPresencaValue);
-
-
 
 export default routes;

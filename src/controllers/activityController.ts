@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
-import { changePresencaValueInActivity, findAllSubscribersInActivity, findUserAtividadeById } from "../repositories/userAtividadeRepository";
+import { changePresencaValueInActivity, changeUserAtividade, findAllSubscribersInActivity, findUserAtividadeById } from "../repositories/userAtividadeRepository";
+import { ChangeActivityParamsRequest } from "../interfaces/changeActivityParamsRequest";
+import { findActivityById } from "../repositories/activityRepository";
 
 export async function getSubscribersInActivity(req: Request, res: Response){
     const { id_atividade } = req.params
@@ -31,4 +33,31 @@ export async function changeActivityPresencaValue(req: Request, res: Response){
     } catch (error) {
         return res.status(400).send(error);
     }
+}
+
+export async function upadateUserActivity(req: Request, res: Response) {
+    try {
+        const { user_id } = req.params;
+        const { uuid_atividade_atual, uuid_atividade_nova }: ChangeActivityParamsRequest = req.body;
+
+        const activity_exists = await findActivityById(uuid_atividade_nova);
+
+        if (!activity_exists) {
+          throw new Error("UUID inválido!");
+        }
+
+        let max_participants = Number(activity_exists.max_participants);
+
+        let total_participants = (await findAllSubscribersInActivity(uuid_atividade_nova)).length
+
+        if(total_participants >= max_participants){
+          throw new Error(`A atividade ${activity_exists.nome} já está completa`)
+        }
+
+        await changeUserAtividade(uuid_atividade_atual, uuid_atividade_nova, user_id)
+
+        return res.status(200).send("Alterado com sucesso")
+    } catch (error) {
+        return res.status(400).send(error)
+    }   
 }

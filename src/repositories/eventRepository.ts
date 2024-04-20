@@ -23,6 +23,19 @@ export async function getEventoPrecoById(uuid_evento: string) {
   return evento.lote;
 }
 
+export async function getLoteByEventId(uuid_evento: string){
+  const response = await prisma.evento.findUnique({
+    where: {
+      uuid_evento
+    },
+    select: {
+      lote: true
+    }
+  })
+
+  return response?.lote[0];
+}
+
 export async function findAllActivitiesInEvent(uuid_evento: string) {
   const activities = await prisma.evento.findFirst({
     where: {

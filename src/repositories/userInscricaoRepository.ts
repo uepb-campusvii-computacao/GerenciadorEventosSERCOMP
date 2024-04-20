@@ -49,18 +49,15 @@ export async function findUserInscricaoByMercadoPagoId(
 }
 
 export async function changeStatusPagamento(
-  id_payment_mercado_pago: string,
+  uuid_lote: string,
+  uuid_user: string,
   status_pagamento: StatusPagamento
 ) {
-  const user_inscricao = await findUserInscricaoByMercadoPagoId(
-    id_payment_mercado_pago
-  );
-
   await prisma.userInscricao.update({
     where: {
       uuid_lote_uuid_user: {
-        uuid_user: user_inscricao!.uuid_user,
-        uuid_lote: user_inscricao!.uuid_lote,
+        uuid_user,
+        uuid_lote
       },
     },
     data: {
@@ -100,6 +97,7 @@ export async function findAllSubscribersInEvent(event_id: string) {
 
   return all_subscribers;
 }
+
 
 export async function getTotalPaymentsInEventByStatusPagemento(
   uuid_evento: string,
