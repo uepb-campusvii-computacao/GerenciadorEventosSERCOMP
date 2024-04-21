@@ -15,26 +15,28 @@ routes.get("/user/payment/:payment_id", getUserInscricao);
 
 routes.get("/events/:event_id/activities", getActivitiesInEvent);
 
+routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", )
+
 routes.get("/lote/:lote_id/inscricoes/:user_id", getUserInLote)
 
 routes.get("/admin/events/:event_id/dashboard", checkToken, getFinancialInformation);
 
-routes.get("/admin/usuarios/:user_id/eventos", checkToken, getAllEventsByIdUser);
+routes.get("/admin/user/:user_id/events", checkToken, getAllEventsByIdUser);
 
 routes.get("/admin/events/:id_evento/inscricoes", checkToken, getAllSubscribersInEvent);
 
-routes.put("/admin/events/:id_evento/inscricoes/credenciamento/:user_id", checkToken, changeEventCredenciamentoValue);
+routes.put("/admin/events/:event_id/inscricoes/credenciamento/:user_id", checkToken, changeEventCredenciamentoValue);
 
 routes.get("/admin/events/:id_evento/atividades", checkToken, getAllActivitiesInEvent);
 
-routes.put("/admin/usuario/:user_id/atividades/troca", checkToken, upadateUserActivity);
+routes.put("/admin/user/:user_id/atividades/troca", checkToken, upadateUserActivity);
 
-routes.put("/admin/usuario/:user_id", checkToken, updateUserInformations);
+routes.put("/admin/user/:user_id", checkToken, updateUserInformations);
 
 routes.put("/admin/lote/:lote_id/inscricoes/:user_id", checkToken, updatePaymentStatus);
 
 routes.get("/admin/atividades/:id_atividade/inscricoes", checkToken, getSubscribersInActivity);
 
-routes.put("/admin/atividades/:id_atividade/inscricoes/:user_id/frequencia", checkToken, changeActivityPresencaValue);
+routes.put("/admin/atividades/:atividade_id/inscricoes/:user_id/frequencia", checkToken, changeActivityPresencaValue);
 
 export default routes;

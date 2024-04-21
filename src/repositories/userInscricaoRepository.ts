@@ -66,6 +66,22 @@ export async function changeStatusPagamento(
   });
 }
 
+export async function changeStatusPagamentoToREALIZADO(uuid_lote: string, uuid_user: string){
+  const user_inscricao = await prisma.userInscricao.update({
+    where: {
+      uuid_lote_uuid_user: {
+        uuid_lote,
+        uuid_user
+      }
+    },
+    data: {
+      status_pagamento: "REALIZADO"
+    }
+  });
+
+  return user_inscricao;
+}
+
 export async function findAllSubscribersInEvent(event_id: string) {
   const event_exists = await prisma.evento.findUnique({
     where: {
