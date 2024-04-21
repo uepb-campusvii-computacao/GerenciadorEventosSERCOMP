@@ -67,6 +67,8 @@ export async function changeStatusPagamento(
 }
 
 export async function changeStatusPagamentoToREALIZADO(uuid_lote: string, uuid_user: string){
+  console.log(uuid_lote, uuid_user)
+  
   const user_inscricao = await prisma.userInscricao.update({
     where: {
       uuid_lote_uuid_user: {
