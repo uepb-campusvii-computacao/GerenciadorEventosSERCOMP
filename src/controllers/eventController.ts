@@ -6,12 +6,24 @@ import {
   getLoteByEventId,
 } from "../repositories/eventRepository";
 import { findActivitiesInEvent } from "../repositories/activityRepository";
-import { changeCredenciamentoValue, findAllSubscribersInEvent, findAllUserInEventByStatusPagamento, findUserInscricaoById } from "../repositories/userInscricaoRepository";
+import { changeCredenciamentoValue, findAllEventsByUserId, findAllSubscribersInEvent, findAllUserInEventByStatusPagamento, findUserInscricaoById } from "../repositories/userInscricaoRepository";
 
 export async function getAllEvents(req: Request, res: Response) {
   const all_events = await findAllEvents();
 
   res.send(all_events);
+}
+
+export async function getAllEventsByIdUser(req: Request, res: Response){
+  try {
+    const { user_id } = req.params;
+
+    const eventos = await findAllEventsByUserId(user_id);
+
+    return res.status(200).json(eventos)
+  } catch (error) {
+    return res.status(400).send("Informação incorreta")
+  }
 }
 
 export async function getActivitiesInEvent(req: Request, res: Response) {
