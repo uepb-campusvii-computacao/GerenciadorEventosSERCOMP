@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUserInLote, getUserInscricao, loginUser, registerUser, updatePaymentStatus, updateUserInformations } from "./controllers/userController";
+import { getUserInLote, getUserInscricao, loginUser, realizarPagemento, registerUser, updatePaymentStatus, updateUserInformations } from "./controllers/userController";
 import { changeEventCredenciamentoValue, getActivitiesInEvent, getAllActivitiesInEvent, getAllEventsByIdUser, getAllSubscribersInEvent, getFinancialInformation } from "./controllers/eventController";
 import { checkToken } from "./lib/ensureAuthenticate";
 import { changeActivityPresencaValue, getSubscribersInActivity, upadateUserActivity } from "./controllers/activityController";
@@ -15,7 +15,7 @@ routes.get("/user/payment/:payment_id", getUserInscricao);
 
 routes.get("/events/:event_id/activities", getActivitiesInEvent);
 
-routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", )
+routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", realizarPagemento)
 
 routes.get("/lote/:lote_id/inscricoes/:user_id", getUserInLote)
 

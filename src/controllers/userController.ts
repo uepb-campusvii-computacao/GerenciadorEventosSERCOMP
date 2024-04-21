@@ -111,9 +111,11 @@ export async function registerUser(req: Request, res: Response) {
 
 export async function realizarPagemento(req: Request, res: Response){
   try {
-    const { lote_id, use_id } = req.params;
+    const { lote_id, user_id } = req.params;
 
-    await changeStatusPagamentoToREALIZADO(lote_id, use_id);
+    console.log("teste")
+    await changeStatusPagamentoToREALIZADO(lote_id, user_id);
+
 
     return res.status(200).send("Valor alterado")
   } catch (error) {
