@@ -10,7 +10,7 @@ export async function checkToken(
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ msg: "Acesso negado" });
+    return res.status(401).json({message: "Acesso negado" });
   }
 
   jsonwebtoken.verify(
@@ -18,7 +18,7 @@ export async function checkToken(
     process.env.SECRET || "",
     (err: jsonwebtoken.VerifyErrors | null, decoded?: any) => {
       if (err) {
-        return res.status(400).send("Token incorreto!");
+        return res.status(401).send({message: "Token inválido"});
       }
 
       req.params.id = decoded.id;

@@ -6,4 +6,5 @@ export interface RegisterUserRequestParams {
     nome_cracha: string;
     instituicao: string;
     atividades?: AtividadesParams;
+    lote_id: string;
 };
