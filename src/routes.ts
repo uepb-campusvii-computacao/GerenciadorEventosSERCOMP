@@ -19,11 +19,11 @@ routes.get("/lote/:lote_id/inscricoes/:user_id", getUserInLote)
 
 routes.get("/admin/events/:event_id/dashboard", checkToken, getFinancialInformation);
 
-routes.get("/admin/usuarios/:user_id/eventos", checkToken, getAllEventsByIdUser);
+routes.get("/admin/user/:user_id/events", checkToken, getAllEventsByIdUser);
 
 routes.get("/admin/events/:id_evento/inscricoes", checkToken, getAllSubscribersInEvent);
 
-routes.put("/admin/events/:id_evento/inscricoes/credenciamento/:user_id", checkToken, changeEventCredenciamentoValue);
+routes.put("/admin/events/:event_id/inscricoes/credenciamento/:user_id", checkToken, changeEventCredenciamentoValue);
 
 routes.get("/admin/events/:id_evento/atividades", checkToken, getAllActivitiesInEvent);
 
