@@ -27,14 +27,14 @@ routes.put("/admin/events/:event_id/inscricoes/credenciamento/:user_id", checkTo
 
 routes.get("/admin/events/:id_evento/atividades", checkToken, getAllActivitiesInEvent);
 
-routes.put("/admin/usuario/:user_id/atividades/troca", checkToken, upadateUserActivity);
+routes.put("/admin/user/:user_id/atividades/troca", checkToken, upadateUserActivity);
 
-routes.put("/admin/usuario/:user_id", checkToken, updateUserInformations);
+routes.put("/admin/user/:user_id", checkToken, updateUserInformations);
 
 routes.put("/admin/lote/:lote_id/inscricoes/:user_id", checkToken, updatePaymentStatus);
 
 routes.get("/admin/atividades/:id_atividade/inscricoes", checkToken, getSubscribersInActivity);
 
-routes.put("/admin/atividades/:id_atividade/inscricoes/:user_id/frequencia", checkToken, changeActivityPresencaValue);
+routes.put("/admin/atividades/:atividade_id/inscricoes/:user_id/frequencia", checkToken, changeActivityPresencaValue);
 
 export default routes;

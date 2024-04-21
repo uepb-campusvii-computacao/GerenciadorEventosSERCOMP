@@ -155,6 +155,7 @@ export async function getUserInLote(req: Request, res: Response) {
       },
       atividades: activities,
       status_pagamento: user_inscricao?.status_pagamento,
+      credenciamento: user_inscricao?.credenciamento
     };
 
     return res.status(200).json(response);

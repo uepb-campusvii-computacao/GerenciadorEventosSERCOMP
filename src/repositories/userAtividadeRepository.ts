@@ -39,7 +39,8 @@ export async function findActivitiesByUserId(uuid_user: string){
           nome: true,
           tipo_atividade: true,
         }
-      }
+      },
+      presenca: true
     },
     orderBy: {
       atividade: {
@@ -49,7 +50,10 @@ export async function findActivitiesByUserId(uuid_user: string){
   });
 
   return response.map(item => (
-    item.atividade
+    {
+      ...item.atividade,
+      presenca: item.presenca
+    }
   ))
 }
 
