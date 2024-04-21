@@ -99,55 +99,36 @@ export async function findAllSubscribersInEvent(event_id: string) {
 }
 
 export async function findAllEventsByUserId(uuid_user: string){
-  const eventos = await prisma.userInscricao.findMany({
-    where: {
-      uuid_user
-    },
-    select: {
-      lote: {
-        select: {
-          evento: {
-            select: {
-              uuid_evento: true,
-              nome: true,
-            }
-          }
-        }
-      }
-    }
-  });
-
-  return eventos.map((evento) => (
-    {...evento.lote.evento}
-  ))
-}
-
-
-export async function getTotalPaymentsInEventByStatusPagemento(
-  uuid_evento: string,
-  status_pagamento: StatusPagamento
-) {
-  const event_exists = await prisma.evento.findUnique({
-    where: {
-      uuid_evento,
-    },
-  });
-
-  if (!event_exists) {
-    throw new Error("UUID incorreto!");
-  }
-
-  const total = await prisma.userInscricao.count({
-    where: {
-      lote: {
-        uuid_evento,
+  try {
+    const eventos = await prisma.evento.findMany({
+      where: {
+        uuid_user_owner: uuid_user,
       },
-      status_pagamento,
-    },
-  });
+      select: {
+        uuid_evento: true,
+        nome: true
+      }
+    });
 
-  return total;
+    return eventos;
+  } catch (error) {
+    console.error("Erro ao buscar eventos:", error);
+    throw error;
+  }
 }
+
+export const userInscriptionsWithFullInfo = async (event_id: string) => await prisma.userInscricao.findMany({
+  where: {
+    lote: {
+      evento: {
+        uuid_evento: event_id,
+      },
+    },
+  },
+  include: {
+    lote: true,
+  },
+});
 
 export async function findAllUserInEventByStatusPagamento(
   uuid_evento: string,
