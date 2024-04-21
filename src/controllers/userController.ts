@@ -53,7 +53,7 @@ export async function loginUser(req: Request, res: Response) {
     }
   );
 
-  return res.status(200).json({ token: token });
+  return res.status(200).json({ token: token, user_id: userExists.uuid_user });
 }
 
 export async function registerUser(req: Request, res: Response) {
@@ -104,7 +104,7 @@ export async function registerUser(req: Request, res: Response) {
 
     return res.status(200).json(user);
   } catch (error) {
-    res.status(400).json(error);
+    return res.status(400).json(error);
   }
 }
 
@@ -129,9 +129,9 @@ export async function getUserInscricao(req: Request, res: Response) {
 
     const payment = await getPayment(payment_id);
 
-    res.status(200).json(payment);
+    return res.status(200).json(payment);
   } catch (error) {
-    res.status(400).send(error);
+    return res.status(400).send(error);
   }
 }
 

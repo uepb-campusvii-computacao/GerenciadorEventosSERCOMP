@@ -6,7 +6,14 @@ import {
   getLoteByEventId,
 } from "../repositories/eventRepository";
 import { findActivitiesInEvent } from "../repositories/activityRepository";
-import { changeCredenciamentoValue, findAllEventsByUserId, findAllSubscribersInEvent, findAllUserInEventByStatusPagamento, findUserInscricaoById } from "../repositories/userInscricaoRepository";
+import {
+  changeCredenciamentoValue,
+  findAllEventsByUserId,
+  userInscriptionsWithFullInfo,
+  findAllSubscribersInEvent,
+  findAllUserInEventByStatusPagamento,
+  findUserInscricaoById,
+} from "../repositories/userInscricaoRepository";
 
 export async function getAllEvents(req: Request, res: Response) {
   const all_events = await findAllEvents();
@@ -14,15 +21,15 @@ export async function getAllEvents(req: Request, res: Response) {
   res.send(all_events);
 }
 
-export async function getAllEventsByIdUser(req: Request, res: Response){
+export async function getAllEventsByIdUser(req: Request, res: Response) {
   try {
     const { user_id } = req.params;
 
     const eventos = await findAllEventsByUserId(user_id);
 
-    return res.status(200).json(eventos)
+    return res.status(200).json(eventos);
   } catch (error) {
-    return res.status(400).send("Informação incorreta")
+    return res.status(400).send("Informação incorreta");
   }
 }
 
@@ -70,9 +77,12 @@ export async function getAllSubscribersInEvent(req: Request, res: Response) {
   }
 }
 
-export async function changeEventCredenciamentoValue(req: Request, res: Response) {
+export async function changeEventCredenciamentoValue(
+  req: Request,
+  res: Response
+) {
   try {
-    const { event_id, user_id } = req.params
+    const { event_id, user_id } = req.params;
 
     const lote = await getLoteByEventId(event_id);
 
@@ -80,11 +90,15 @@ export async function changeEventCredenciamentoValue(req: Request, res: Response
 
     const user_inscricao = await findUserInscricaoById(user_id, lote_id);
 
-    await changeCredenciamentoValue(user_id, lote_id, !user_inscricao?.credenciamento);
+    await changeCredenciamentoValue(
+      user_id,
+      lote_id,
+      !user_inscricao?.credenciamento
+    );
 
-    return res.status(200).send("Valor Alterado com sucesso!")
+    return res.status(200).send("Valor Alterado com sucesso!");
   } catch (error) {
-    return res.status(400).send("Informações inválidas")
+    return res.status(400).send("Informações inválidas");
   }
 }
 
@@ -104,26 +118,32 @@ export async function getAllActivitiesInEvent(req: Request, res: Response) {
   }
 }
 
-export async function getFinancialInformation(req: Request, res: Response){
-  try{
+export async function getFinancialInformation(req: Request, res: Response) {
+  try {
     const { event_id } = req.params;
 
-    const total_users_registered = await findAllSubscribersInEvent(event_id)
+    const userInscriptions = await userInscriptionsWithFullInfo(event_id);
 
-    const total_users_with_payment_status_pendente = await findAllUserInEventByStatusPagamento(event_id, "PENDENTE");
+    const usersRegistered = userInscriptions.length;
+    const usersWithPaymentStatusPending = userInscriptions.filter(
+      (inscricao) => inscricao.status_pagamento === 'PENDENTE'
+    ).length;
+    const usersWithPaymentStatusRealizado = userInscriptions.filter(
+      (inscricao) => inscricao.status_pagamento === 'REALIZADO'
+    );
 
-    const total_users_with_payment_status_realizado = await findAllUserInEventByStatusPagamento(event_id, "REALIZADO");
+    let totalArrecadado = 0;
+    usersWithPaymentStatusRealizado.forEach((inscricao) => {
+      totalArrecadado += inscricao.lote.preco;
+    });
 
-    const precos = await getEventoPrecoById(event_id);
-
-    const total_arrecadado = total_users_with_payment_status_realizado.length * precos[0].preco
-
-    res.status(200).json({
-      total_inscritos: total_users_registered.length,
-      total_arrecadado: total_arrecadado,
-      inscricoes_pendentes: total_users_with_payment_status_pendente.length
-    })
-  }catch(error){
-    return res.status(400).json(error)
+    return res.status(200).json({
+      total_inscritos: usersRegistered,
+      total_arrecadado: totalArrecadado,
+      inscricoes_pendentes: usersWithPaymentStatusPending,
+    });
+  } catch (error) {
+    console.error("Erro ao obter informações financeiras:", error);
+    return res.status(500).json({ error: 'Erro ao obter informações financeiras' });
   }
 }
