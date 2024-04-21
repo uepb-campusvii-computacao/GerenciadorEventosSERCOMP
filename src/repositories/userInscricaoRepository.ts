@@ -98,6 +98,30 @@ export async function findAllSubscribersInEvent(event_id: string) {
   return all_subscribers;
 }
 
+export async function findAllEventsByUserId(uuid_user: string){
+  const eventos = await prisma.userInscricao.findMany({
+    where: {
+      uuid_user
+    },
+    select: {
+      lote: {
+        select: {
+          evento: {
+            select: {
+              uuid_evento: true,
+              nome: true,
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return eventos.map((evento) => (
+    {...evento.lote.evento}
+  ))
+}
+
 
 export async function getTotalPaymentsInEventByStatusPagemento(
   uuid_evento: string,

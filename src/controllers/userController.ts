@@ -1,15 +1,28 @@
 import { Request, Response } from "express";
 import { RegisterUserRequestParams } from "../interfaces/registerUserRequestParam";
-import { createUser, findUserByEmail, findUserById, updateUser } from "../repositories/userRepository";
-import { createUserAtividade, findActivitiesByUserId, findAllSubscribersInActivity } from "../repositories/userAtividadeRepository";
+import {
+  createUser,
+  findUserByEmail,
+  findUserById,
+  updateUser,
+} from "../repositories/userRepository";
+import {
+  createUserAtividade,
+  findActivitiesByUserId,
+  findAllSubscribersInActivity,
+} from "../repositories/userAtividadeRepository";
 import { findActivityById } from "../repositories/activityRepository";
 import { createPayment } from "../services/payments/createPayment";
 import { getPayment } from "../services/payments/getPayment";
 import { UserLoginParams } from "../interfaces/userLoginParams";
 import jsonwebtoken from "jsonwebtoken";
-import { changeStatusPagamento, findUserInscricaoById } from "../repositories/userInscricaoRepository";
+import {
+  changeStatusPagamento,
+  findUserInscricaoById,
+} from "../repositories/userInscricaoRepository";
 import { UpdatePaymentStatusParams } from "../interfaces/updatePaymentStatusParams";
 import { UpdateUserParams } from "../interfaces/updateUserParams";
+import { checkPassword } from "../services/user/checkPassword";
 
 export async function loginUser(req: Request, res: Response) {
   const params: UserLoginParams = req.body;
@@ -17,12 +30,16 @@ export async function loginUser(req: Request, res: Response) {
   const { email, senha } = params;
 
   const userExists = await findUserByEmail(email);
-
+  
   if (!userExists) {
     return res.status(401).send("email não encontrado");
   }
 
-  if (userExists.senha === senha) {
+  const password_encrypted = userExists.senha || ""
+
+  const check_password = await checkPassword(senha, password_encrypted);
+
+  if (!check_password) {
     return res.status(401).send("Senha inválida!");
   }
 
@@ -69,10 +86,14 @@ export async function registerUser(req: Request, res: Response) {
 
         let max_participants = Number(activity_exists.max_participants);
 
-        let total_participants = (await findAllSubscribersInActivity(uuid_atividade)).length
+        let total_participants = (
+          await findAllSubscribersInActivity(uuid_atividade)
+        ).length;
 
-        if(total_participants >= max_participants){
-          throw new Error(`A atividade ${activity_exists.nome} já está completa`)
+        if (total_participants >= max_participants) {
+          throw new Error(
+            `A atividade ${activity_exists.nome} já está completa`
+          );
         }
 
         await createUserAtividade(use_id, uuid_atividade);
@@ -87,17 +108,18 @@ export async function registerUser(req: Request, res: Response) {
   }
 }
 
-export async function updateUserInformations(req: Request, res: Response){
+export async function updateUserInformations(req: Request, res: Response) {
   try {
     const { user_id } = req.params;
 
-    const { nome, email, nome_cracha, instituicao }: UpdateUserParams = req.body;
+    const { nome, email, nome_cracha, instituicao }: UpdateUserParams =
+      req.body;
 
     await updateUser(user_id, nome, email, nome_cracha, instituicao);
 
     return res.status(200).send("Dados alterados com sucesso!");
   } catch (error) {
-    return res.status(400).send(error)
+    return res.status(400).send(error);
   }
 }
 
@@ -113,7 +135,7 @@ export async function getUserInscricao(req: Request, res: Response) {
   }
 }
 
-export async function getUserInLote(req: Request, res: Response){
+export async function getUserInLote(req: Request, res: Response) {
   try {
     const { lote_id, user_id } = req.params;
 
@@ -129,27 +151,27 @@ export async function getUserInLote(req: Request, res: Response){
         nome: personal_user_information.nome,
         nome_cracha: personal_user_information.nome_cracha,
         email: personal_user_information.email,
-        instituicao: personal_user_information.instituicao
+        instituicao: personal_user_information.instituicao,
       },
       atividades: activities,
-      status_pagamento: user_inscricao?.status_pagamento
-    }
+      status_pagamento: user_inscricao?.status_pagamento,
+    };
 
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).send("Informações inválidas")
+    return res.status(400).send("Informações inválidas");
   }
 }
 
-export async function updatePaymentStatus(req: Request, res: Response){
+export async function updatePaymentStatus(req: Request, res: Response) {
   try {
     const { lote_id, user_id } = req.params;
     const { status_pagamento }: UpdatePaymentStatusParams = req.body;
 
-    await changeStatusPagamento(lote_id, user_id, status_pagamento)
+    await changeStatusPagamento(lote_id, user_id, status_pagamento);
 
-    res.status(200).send("Alterado com sucesso!")
+    res.status(200).send("Alterado com sucesso!");
   } catch (error) {
-    return res.status(400).send(error)
+    return res.status(400).send(error);
   }
 }
