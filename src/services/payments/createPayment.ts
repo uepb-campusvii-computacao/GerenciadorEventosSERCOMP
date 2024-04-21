@@ -16,6 +16,7 @@ export async function createPayment(user_id: string, lote_id: string) {
       transaction_amount: lote.preco,
       description: "Compra de ingresso",
       payment_method_id: "pix",
+      notification_url: `https://gerenciadoreventossercomp.onrender.com/lote/${lote_id}/user/${user_id}/realizar-pagamento`,
       payer: {
         email: user.email,
       },

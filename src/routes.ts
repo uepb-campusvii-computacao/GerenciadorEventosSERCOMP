@@ -15,6 +15,8 @@ routes.get("/user/payment/:payment_id", getUserInscricao);
 
 routes.get("/events/:event_id/activities", getActivitiesInEvent);
 
+routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", )
+
 routes.get("/lote/:lote_id/inscricoes/:user_id", getUserInLote)
 
 routes.get("/admin/events/:event_id/dashboard", checkToken, getFinancialInformation);

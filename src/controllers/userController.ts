@@ -18,6 +18,7 @@ import { UserLoginParams } from "../interfaces/userLoginParams";
 import jsonwebtoken from "jsonwebtoken";
 import {
   changeStatusPagamento,
+  changeStatusPagamentoToREALIZADO,
   findUserInscricaoById,
 } from "../repositories/userInscricaoRepository";
 import { UpdatePaymentStatusParams } from "../interfaces/updatePaymentStatusParams";
@@ -105,6 +106,18 @@ export async function registerUser(req: Request, res: Response) {
     return res.status(200).json(user);
   } catch (error) {
     return res.status(400).json(error);
+  }
+}
+
+export async function realizarPagemento(req: Request, res: Response){
+  try {
+    const { lote_id, use_id } = req.params;
+
+    await changeStatusPagamentoToREALIZADO(lote_id, use_id);
+
+    return res.status(200).send("Valor alterado")
+  } catch (error) {
+    return res.status(400).send("informações inválidas")
   }
 }
 
