@@ -1,42 +1,63 @@
 import { Router } from "express";
-import { getUserInLote, getUserInscricao, loginUser, realizarPagemento, registerUser, updatePaymentStatus, updateUserInformations } from "./controllers/userController";
-import { changeEventCredenciamentoValue, getActivitiesInEvent, getAllActivitiesInEvent, getAllEventsByIdUser, getAllSubscribersInEvent, getFinancialInformation } from "./controllers/eventController";
+import {
+    changeActivityPresencaValue,
+    getActivityById,
+    getSubscribersInActivity,
+    upadateUserActivity,
+} from "./controllers/activityController";
+import {
+    changeEventCredenciamentoValue,
+    getAllActivitiesInEvent,
+    getAllEventsByIdUser,
+    getAllSubscribersInEvent,
+    getFinancialInformation,
+    registerParticipanteInEvent,
+    updateParticipantInformations,
+} from "./controllers/eventController";
+import {
+    getUserInEvent,
+    getUserInscricao,
+    loginUser,
+    realizarPagemento,
+    updatePaymentStatus,
+} from "./controllers/userController";
 import { checkToken } from "./lib/ensureAuthenticate";
-import { changeActivityPresencaValue, getSubscribersInActivity, upadateUserActivity } from "./controllers/activityController";
 
 const routes = Router();
 
-
+// Rotas Públicas
 routes.post("/login", loginUser);
+routes.post("/register/:event_id", registerParticipanteInEvent);
 
-routes.post("/register/:lote_id", registerUser);
+// Rotas para usuários (com autenticação)
+const userRoutes = Router();
+userRoutes.use(checkToken);
+userRoutes.get("/user/payment/:payment_id", getUserInscricao);
+userRoutes.get("/event/:event_id/inscricao/:user_id", getUserInEvent);
+userRoutes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", realizarPagemento);
+userRoutes.put("/admin/user/:user_id", updateParticipantInformations);
+userRoutes.put("/admin/lote/:lote_id/inscricoes/:user_id", updatePaymentStatus);
 
-routes.get("/user/payment/:payment_id", getUserInscricao);
+// Rotas para eventos (com autenticação)
+const eventRoutes = Router();
+eventRoutes.use(checkToken);
+eventRoutes.get("/admin/events/:event_id/dashboard", getFinancialInformation);
+eventRoutes.get("/admin/user/:user_id/events", getAllEventsByIdUser);
+eventRoutes.get("/admin/events/:id_evento/inscricoes", getAllSubscribersInEvent);
+eventRoutes.put("/admin/events/:event_id/inscricoes/credenciamento/:user_id", changeEventCredenciamentoValue);
+eventRoutes.get("/admin/events/:id_evento/atividades", getAllActivitiesInEvent);
 
-routes.get("/events/:event_id/activities", getActivitiesInEvent);
+// Rotas para atividades (com autenticação)
+const activityRoutes = Router();
+activityRoutes.use(checkToken);
+activityRoutes.get("/admin/atividades/:id_atividade/inscricoes", getSubscribersInActivity);
+activityRoutes.get("/admin/atividades/:atividade_id", getActivityById);
+activityRoutes.put("/admin/atividades/:atividade_id/inscricoes/:user_id/frequencia", changeActivityPresencaValue);
+activityRoutes.put("/admin/user/:user_id/atividades/troca", upadateUserActivity);
 
-routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", realizarPagemento)
-
-routes.get("/lote/:lote_id/inscricoes/:user_id", getUserInLote)
-
-routes.get("/admin/events/:event_id/dashboard", checkToken, getFinancialInformation);
-
-routes.get("/admin/user/:user_id/events", checkToken, getAllEventsByIdUser);
-
-routes.get("/admin/events/:id_evento/inscricoes", checkToken, getAllSubscribersInEvent);
-
-routes.put("/admin/events/:event_id/inscricoes/credenciamento/:user_id", checkToken, changeEventCredenciamentoValue);
-
-routes.get("/admin/events/:id_evento/atividades", checkToken, getAllActivitiesInEvent);
-
-routes.put("/admin/user/:user_id/atividades/troca", checkToken, upadateUserActivity);
-
-routes.put("/admin/user/:user_id", checkToken, updateUserInformations);
-
-routes.put("/admin/lote/:lote_id/inscricoes/:user_id", checkToken, updatePaymentStatus);
-
-routes.get("/admin/atividades/:id_atividade/inscricoes", checkToken, getSubscribersInActivity);
-
-routes.put("/admin/atividades/:atividade_id/inscricoes/:user_id/frequencia", checkToken, changeActivityPresencaValue);
+// Monta os sub-routers no Router principal
+routes.use("/", userRoutes);
+routes.use("/", eventRoutes);
+routes.use("/", activityRoutes);
 
 export default routes;
