@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { changePresencaValueInActivity, changeUserAtividade, createUserAtividade, findAllSubscribersInActivity, findUserAtividadeById } from "../repositories/userAtividadeRepository";
 import { ChangeActivityParamsRequest } from "../interfaces/changeActivityParamsRequest";
-import { findActivityById } from "../repositories/activityRepository";
+import { findActivityById, findActivityPubInfoById } from "../repositories/activityRepository";
+import { changePresencaValueInActivity, changeUserAtividade, createUserAtividade, findAllSubscribersInActivity, findUserAtividadeById } from "../repositories/userAtividadeRepository";
 
 export async function getSubscribersInActivity(req: Request, res: Response){
     const { id_atividade } = req.params
@@ -30,6 +30,18 @@ export async function changeActivityPresencaValue(req: Request, res: Response){
         await changePresencaValueInActivity(atividade_id, user_id, !activity?.presenca);
 
         return res.status(200).send("Valor alterado com sucesso!");
+    } catch (error) {
+        return res.status(400).send(error);
+    }
+}
+
+export async function getActivityById(req: Request, res: Response){
+    try {
+        const { atividade_id } = req.params;
+
+        const activity = await findActivityPubInfoById(atividade_id);
+
+        return res.status(200).json({...activity});
     } catch (error) {
         return res.status(400).send(error);
     }

@@ -1,4 +1,4 @@
-import { StatusPagamento } from "@prisma/client";
+import { StatusPagamento, TipoAtividade, Usuario } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 
 export async function createUserInscricao(
@@ -19,15 +19,26 @@ export async function createUserInscricao(
   return user_inscricao;
 }
 
-export async function findUserInscricaoById(uuid_user: string, uuid_lote: string){
-  const user_inscricao = await prisma.userInscricao.findUnique({
-    where:{
-      uuid_lote_uuid_user: {
-        uuid_lote,
-        uuid_user
-      }
+export async function findUserInscricaoByEventId(uuid_user: string, uuid_evento: string) {
+  //Só pode existir 1 inscrição por evento, independetemente da quantidade de lotes!
+  const lote = await prisma.lote.findFirst({
+    where: {
+      uuid_evento,
     }
-  })
+  });
+
+  if (!lote) {
+    throw new Error(`Nenhum lote encontrado para o evento com ID ${uuid_evento}.`);
+  }
+
+  const user_inscricao = await prisma.userInscricao.findUnique({
+    where: {
+      uuid_lote_uuid_user: {
+        uuid_lote: lote.uuid_lote,
+        uuid_user,
+      },
+    },
+  });
 
   return user_inscricao;
 }
@@ -135,7 +146,119 @@ export async function findAllEventsByUserId(uuid_user: string){
   }
 }
 
-export const userInscriptionsWithFullInfo = async (event_id: string) => await prisma.userInscricao.findMany({
+export interface ActivityUpdate {
+  id: string;
+  type: TipoAtividade;
+}
+
+function toStatusPagamento(value: string): StatusPagamento {
+  const map: Record<string, StatusPagamento> = {
+    "PENDENTE": StatusPagamento.PENDENTE,
+    "REALIZADO": StatusPagamento.REALIZADO,
+    "EXPIRADO": StatusPagamento.EXPIRADO,
+  };
+
+  return map[value];
+}
+
+export async function updateParticipante(
+  user_id: string,
+  nome: string,
+  nome_cracha: string,
+  email: string,
+  instituicao: string,
+  status_pagamento?: string,
+  activities: ActivityUpdate[] = []
+): Promise<Usuario> {
+  
+  const updatedUser = await prisma.usuario.update({
+    where: { uuid_user: user_id },
+    data: {
+      nome,
+      nome_cracha,
+      email,
+      instituicao,
+    },
+  });
+
+  const replaceActivity = async (
+    userId: string,
+    activityId: string,
+    activityType: TipoAtividade
+  ) => {
+    await prisma.userAtividade.deleteMany({
+      where: {
+        uuid_user: userId,
+        atividade: {
+          tipo_atividade: activityType,
+        },
+      },
+    });
+
+    await prisma.userAtividade.create({
+      data: {
+        uuid_user: userId,
+        uuid_atividade: activityId,
+      },
+    });
+  };
+
+  const updateActivities = activities.map((activity) =>{
+    console.log(activity)
+    replaceActivity(user_id, activity.id, activity.type)}
+  );
+
+  let updatePaymentStatus;
+  if(status_pagamento){
+    const status = toStatusPagamento(status_pagamento)
+    updatePaymentStatus = prisma.userInscricao.updateMany({
+      where: {
+        uuid_user: user_id,
+      },
+      data: {
+        status_pagamento : status,
+      },
+    })
+  }
+
+  await Promise.all([...updateActivities, updatePaymentStatus]);
+
+  return updatedUser;
+}
+
+export const projectionTableCredenciamento = async  (event_id: string) => {
+  const users = await prisma.userInscricao.findMany({
+    where: {
+      uuid_lote: {
+        in: await prisma.lote.findMany({
+          where: { uuid_evento: event_id },
+          select: { uuid_lote: true },
+        }).then((lotes) => lotes.map((lote) => lote.uuid_lote)),
+      },
+    },
+    select: {
+      usuario: {
+        select: {
+          uuid_user: true,
+          nome: true,
+          email: true,
+        },
+      },
+      status_pagamento: true,
+      credenciamento: true,
+    },
+  });
+
+  return users.map((userInscricao) => ({
+    uuid_user: userInscricao.usuario.uuid_user,
+    nome: userInscricao.usuario.nome,
+    email: userInscricao.usuario.email,
+    status_pagamento: userInscricao.status_pagamento,
+    credenciamento: userInscricao.credenciamento,
+  }));
+}
+
+export const findUserInscriptionStatus = async (event_id: string) => await prisma.userInscricao.findMany({
   where: {
     lote: {
       evento: {

@@ -1,19 +1,99 @@
+import { TipoAtividade } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
+import { RegisterUserRequestParams } from "../interfaces/registerUserRequestParam";
 import {
   findAllActivitiesInEvent,
   findAllEvents,
-  getEventoPrecoById,
   getLoteByEventId,
+  registerParticipante,
 } from "../repositories/eventRepository";
-import { findActivitiesInEvent } from "../repositories/activityRepository";
 import {
   changeCredenciamentoValue,
   findAllEventsByUserId,
-  userInscriptionsWithFullInfo,
-  findAllSubscribersInEvent,
-  findAllUserInEventByStatusPagamento,
-  findUserInscricaoById,
+  findUserInscricaoByEventId,
+  findUserInscriptionStatus,
+  projectionTableCredenciamento,
+  updateParticipante
 } from "../repositories/userInscricaoRepository";
+
+export async function registerParticipanteInEvent(req: Request, res: Response) {
+  try {
+    const {
+      nome,
+      email,
+      instituicao,
+      nome_cracha,
+      atividades,
+      lote_id
+    }: RegisterUserRequestParams = req.body;
+
+    const user = await registerParticipante({nome, email, instituicao, nome_cracha, atividades, lote_id})
+
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(400).json(error);
+  }
+}
+
+export async function updateParticipantInformations(req: Request, res: Response) {
+  try {
+    const { user_id } = req.params;
+
+    const {
+      nome,
+      nome_cracha,
+      email,
+      instituicao,
+      status_pagamento,
+      minicurso,
+      workshop,
+      oficina,
+    } = req.body;
+
+    console.log(req.body)
+
+    const activities: { id: string; type: TipoAtividade }[] = [];
+
+    if (minicurso) {
+      activities.push({ id: minicurso, type: "MINICURSO" });
+    }
+
+    if (workshop) {
+      activities.push({ id: workshop, type: "WORKSHOP" });
+    }
+
+    if (oficina) {
+      activities.push({ id: oficina, type: "OFICINA" });
+    }
+
+    const updatedUser = await updateParticipante(
+      user_id,
+      nome,
+      nome_cracha,
+      email,
+      instituicao,
+      status_pagamento,
+      activities
+    );    
+
+    return res.status(200).json({
+      message: "Dados alterados com sucesso!",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar informações do usuário:", error);
+
+    let errorMessage = "Erro ao atualizar dados do usuário.";
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        errorMessage = "Este e-mail já está em uso.";
+      }
+    }
+
+    res.status(400).json({ message: errorMessage });
+  }
+}
 
 export async function getAllEvents(req: Request, res: Response) {
   const all_events = await findAllEvents();
@@ -33,46 +113,19 @@ export async function getAllEventsByIdUser(req: Request, res: Response) {
   }
 }
 
-export async function getActivitiesInEvent(req: Request, res: Response) {
-  try {
-    const { event_id } = req.params;
-
-    const workshops = await findActivitiesInEvent(event_id, "WORKSHOP");
-    const minicursos = await findActivitiesInEvent(event_id, "MINICURSO");
-    const oficinas = await findActivitiesInEvent(event_id, "OFICINA");
-    const palestras = await findActivitiesInEvent(event_id, "PALESTRA");
-
-    res.status(200).json({
-      atividades: {
-        minicursos,
-        workshops,
-        oficinas,
-        palestras,
-      },
-    });
-  } catch (error) {
-    return res.status(400).send(error);
-  }
-}
-
 export async function getAllSubscribersInEvent(req: Request, res: Response) {
   try {
     const { id_evento } = req.params;
 
-    const all_subscribers = await findAllSubscribersInEvent(id_evento);
+    const all_subscribers = await projectionTableCredenciamento(id_evento);
 
     if (!all_subscribers) {
       return res.status(400).send("Evento não encontrado");
     }
 
-    return res.status(200).json(
-      all_subscribers.map((subscriber) => ({
-        uuid_user: subscriber.uuid_user,
-        credenciamento: subscriber.credenciamento,
-        ...subscriber.usuario,
-      }))
-    );
+    return res.status(200).json({all_subscribers});
   } catch (error) {
+    console.log(error);
     return res.status(400).send(error);
   }
 }
@@ -85,10 +138,9 @@ export async function changeEventCredenciamentoValue(
     const { event_id, user_id } = req.params;
 
     const lote = await getLoteByEventId(event_id);
-
     const lote_id = lote!.uuid_lote;
 
-    const user_inscricao = await findUserInscricaoById(user_id, lote_id);
+    const user_inscricao = await findUserInscricaoByEventId(user_id, event_id);
 
     await changeCredenciamentoValue(
       user_id,
@@ -98,6 +150,7 @@ export async function changeEventCredenciamentoValue(
 
     return res.status(200).send("Valor Alterado com sucesso!");
   } catch (error) {
+    console.log(error)
     return res.status(400).send("Informações inválidas");
   }
 }
@@ -122,7 +175,7 @@ export async function getFinancialInformation(req: Request, res: Response) {
   try {
     const { event_id } = req.params;
 
-    const userInscriptions = await userInscriptionsWithFullInfo(event_id);
+    const userInscriptions = await findUserInscriptionStatus(event_id);
 
     const usersRegistered = userInscriptions.length;
     const usersWithPaymentStatusPending = userInscriptions.filter(
