@@ -12,11 +12,13 @@ export async function createPayment(user_id: string, lote_id: string) {
       idempotencyKey: `${user_id}-${lote_id}`,
     };
 
+    const API_URL = process.env.API_URL || "";
+
     const body = {
       transaction_amount: lote.preco,
       description: "Compra de ingresso",
       payment_method_id: "pix",
-      notification_url: `https://gerenciadoreventossercomp.onrender.com/lote/${lote_id}/user/${user_id}/realizar-pagamento`,
+      notification_url: `${API_URL}/lote/${lote_id}/user/${user_id}/realizar-pagamento`,
       payer: {
         email: user.email,
       },
