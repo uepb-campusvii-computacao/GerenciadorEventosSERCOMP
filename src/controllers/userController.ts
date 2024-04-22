@@ -8,7 +8,8 @@ import {
 import {
   changeStatusPagamento,
   changeStatusPagamentoToREALIZADO,
-  findUserInscricaoByEventId
+  findUserInscricaoByEventId,
+  findUserInscricaoById
 } from "../repositories/userInscricaoRepository";
 import {
   findUserByEmail,
@@ -16,6 +17,7 @@ import {
 } from "../repositories/userRepository";
 import { getPayment } from "../services/payments/getPayment";
 import { checkPassword } from "../services/user/checkPassword";
+import { findLoteById } from "../repositories/loteRepository";
 
 export async function loginUser(req: Request, res: Response) {
   const params: UserLoginParams = req.body;
@@ -62,11 +64,40 @@ export async function realizarPagemento(req: Request, res: Response) {
   }
 }
 
+export async function getUserInformation(req: Request, res: Response) {
+  try {
+    const { user_id, lote_id } = req.params;
+
+    const atividades = await findActivitiesByUserId(user_id);
+    const user = await findUserById(user_id);
+    const user_inscricao = await findUserInscricaoById(user_id, lote_id);
+    const lote = await findLoteById(lote_id)
+
+    const response = {
+      user_name: user.nome,
+      inscricao: {
+        status: user_inscricao?.status_pagamento,
+        nome_lote: lote.nome,
+        preco: lote.preco
+      },
+      atividades: atividades.map(atividade => ({
+        nome: atividade.nome,
+        tipo: atividade.tipo_atividade,
+      }))
+    }
+
+
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+}
+
 export async function getUserInscricao(req: Request, res: Response) {
   try {
-    const { payment_id } = req.params;
+    const { user_id, lote_id } = req.params;
 
-    const payment = await getPayment(payment_id);
+    const payment = await getPayment(user_id, lote_id);
 
     return res.status(200).json(payment);
   } catch (error) {
