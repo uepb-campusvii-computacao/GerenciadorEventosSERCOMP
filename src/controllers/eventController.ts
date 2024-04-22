@@ -5,7 +5,7 @@ import { RegisterUserRequestParams } from "../interfaces/registerUserRequestPara
 import {
   findAllActivitiesInEvent,
   findAllEvents,
-  getLoteByEventId,
+  getLotesByEventID,
   registerParticipante,
 } from "../repositories/eventRepository";
 import {
@@ -16,6 +16,7 @@ import {
   projectionTableCredenciamento,
   updateParticipante
 } from "../repositories/userInscricaoRepository";
+import { findActivitiesInEvent } from "../repositories/activityRepository";
 
 export async function registerParticipanteInEvent(req: Request, res: Response) {
   try {
@@ -33,6 +34,18 @@ export async function registerParticipanteInEvent(req: Request, res: Response) {
     return res.status(200).json(user);
   } catch (error) {
     return res.status(400).json(error);
+  }
+}
+
+export async function getLotesInEvent(req: Request, res: Response){
+  try {
+    const { event_id } = req.params;
+
+    const lotes_in_event = await getLotesByEventID(event_id);
+
+    return res.status(200).json(lotes_in_event);
+  } catch (error) {
+    return res.status(400).send("informações inválidas")
   }
 }
 
@@ -137,14 +150,11 @@ export async function changeEventCredenciamentoValue(
   try {
     const { event_id, user_id } = req.params;
 
-    const lote = await getLoteByEventId(event_id);
-    const lote_id = lote!.uuid_lote;
-
     const user_inscricao = await findUserInscricaoByEventId(user_id, event_id);
 
     await changeCredenciamentoValue(
       user_id,
-      lote_id,
+      user_inscricao!.uuid_lote,
       !user_inscricao?.credenciamento
     );
 
@@ -168,6 +178,24 @@ export async function getAllActivitiesInEvent(req: Request, res: Response) {
     return res.status(200).json(all_activities.atividade);
   } catch (error) {
     return res.status(400).send(error);
+  }
+}
+
+export async function getAllActivitiesInEventOrdenateByTipo(req: Request, res: Response){
+  try {
+    const { id_evento } = req.params;
+
+    const minicursos = await findActivitiesInEvent(id_evento, "MINICURSO")
+    const oficinas = await findActivitiesInEvent(id_evento, "OFICINA")
+    const workshops = await findActivitiesInEvent(id_evento, "WORKSHOP");
+
+    return res.status(200).json({
+      minicursos,
+      oficinas,
+      workshops
+    })
+  } catch (error) {
+    return res.status(400).send("Informações invalidas!")
   }
 }
 

@@ -1,7 +1,10 @@
 import { prisma } from "../lib/prisma";
 import { createPayment } from "../services/payments/createPayment";
 import { findActivityById } from "./activityRepository";
-import { createUserAtividade, findAllSubscribersInActivity } from "./userAtividadeRepository";
+import {
+  createUserAtividade,
+  findAllSubscribersInActivity,
+} from "./userAtividadeRepository";
 import { getOrCreateUser } from "./userRepository";
 
 export async function findAllEvents() {
@@ -13,15 +16,15 @@ export async function findAllEvents() {
 export async function getEventoPrecoById(uuid_evento: string) {
   const evento = await prisma.evento.findUniqueOrThrow({
     where: {
-       uuid_evento
+      uuid_evento,
     },
     select: {
       lote: {
         select: {
-          preco: true
-        }
-      }
-    }
+          preco: true,
+        },
+      },
+    },
   });
 
   return evento.lote;
@@ -46,13 +49,17 @@ export async function registerParticipante({
   email,
   instituicao,
   atividades,
-  lote_id
+  lote_id,
 }: RegisterParticipanteParams) {
   return prisma.$transaction(async () => {
+    const user = await getOrCreateUser({
+      nome,
+      nome_cracha,
+      email,
+      instituicao,
+    });
 
-    const user = await getOrCreateUser({nome, nome_cracha, email, instituicao});
-
-    if(await isUserRegisteredInEventFromLote(user.uuid_user, lote_id)){
+    if (await isUserRegisteredInEventFromLote(user.uuid_user, lote_id)) {
       throw new Error("Você ja se cadastrou nesse evento!");
     }
 
@@ -76,7 +83,9 @@ export async function registerParticipante({
           ).length;
 
           if (total_participants >= activity.max_participants) {
-            throw new Error(`A atividade ${activity.nome} já está esgotou as vagas.`);
+            throw new Error(
+              `A atividade ${activity.nome} já está esgotou as vagas.`
+            );
           }
         }
 
@@ -92,7 +101,6 @@ export async function isUserRegisteredInEventFromLote(
   user_id: string,
   lote_id: string
 ): Promise<boolean> {
-
   const lote = await prisma.lote.findUnique({
     where: {
       uuid_lote: lote_id,
@@ -120,17 +128,17 @@ export async function isUserRegisteredInEventFromLote(
   return registrationCount > 0;
 }
 
-export async function getLoteByEventId(id_evento: string){
+export async function getLotesByEventID(id_evento: string) {
   const response = await prisma.evento.findUnique({
     where: {
-      uuid_evento : id_evento
+      uuid_evento: id_evento,
     },
     select: {
-      lote: true
-    }
-  })
+      lote: true,
+    },
+  });
 
-  return response?.lote[0];
+  return response?.lote;
 }
 
 export async function findAllActivitiesInEvent(uuid_evento: string) {
@@ -152,7 +160,7 @@ export async function findAllActivitiesInEvent(uuid_evento: string) {
           },
         },
         orderBy: {
-          nome: 'asc',
+          nome: "asc",
         },
       },
     },
@@ -160,3 +168,4 @@ export async function findAllActivitiesInEvent(uuid_evento: string) {
 
   return activities;
 }
+
