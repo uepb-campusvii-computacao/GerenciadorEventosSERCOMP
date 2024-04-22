@@ -2,11 +2,13 @@ import { TipoAtividade } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
 import { RegisterUserRequestParams } from "../interfaces/registerUserRequestParam";
+import { findActivitiesInEvent } from "../repositories/activityRepository";
 import {
   findAllActivitiesInEvent,
   findAllEvents,
   registerParticipante,
 } from "../repositories/eventRepository";
+import { getLotesAtivosByEventID } from "../repositories/loteRepository";
 import {
   changeCredenciamentoValue,
   findAllEventsByUserId,
@@ -15,8 +17,6 @@ import {
   projectionTableCredenciamento,
   updateParticipante
 } from "../repositories/userInscricaoRepository";
-import { findActivitiesInEvent } from "../repositories/activityRepository";
-import { getLotesAtivosByEventID } from "../repositories/loteRepository";
 
 export async function registerParticipanteInEvent(req: Request, res: Response) {
   try {
@@ -64,8 +64,6 @@ export async function updateParticipantInformations(req: Request, res: Response)
       oficina,
     } = req.body;
 
-    console.log(req.body)
-
     const activities: { id: string; type: TipoAtividade }[] = [];
 
     if (minicurso) {
@@ -102,9 +100,11 @@ export async function updateParticipantInformations(req: Request, res: Response)
       if (error.code === "P2002") {
         errorMessage = "Este e-mail já está em uso.";
       }
+    }else if(error instanceof Error){
+      errorMessage = error.message;
     }
 
-    res.status(400).json({ message: errorMessage });
+    return res.status(400).json({ message: errorMessage });
   }
 }
 

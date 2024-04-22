@@ -1,9 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { createPayment } from "../services/payments/createPayment";
-import { findActivityById } from "./activityRepository";
 import {
-  createUserAtividade,
-  findAllSubscribersInActivity,
+  checkIfActivityHasVacancy,
+  createUserAtividade
 } from "./userAtividadeRepository";
 import { getOrCreateUser } from "./userRepository";
 
@@ -71,24 +70,7 @@ export async function registerParticipante({
 
     for (const uuid_atividade of activities_ids) {
       if (uuid_atividade) {
-        const activity = await findActivityById(uuid_atividade);
-
-        if (!activity) {
-          throw new Error("Atividade inválido!");
-        }
-
-        if (activity.max_participants) {
-          const total_participants = (
-            await findAllSubscribersInActivity(uuid_atividade)
-          ).length;
-
-          if (total_participants >= activity.max_participants) {
-            throw new Error(
-              `A atividade ${activity.nome} já está esgotou as vagas.`
-            );
-          }
-        }
-
+        await checkIfActivityHasVacancy(uuid_atividade, user.uuid_user);
         await createUserAtividade(user.uuid_user, uuid_atividade);
       }
     }
