@@ -8,9 +8,11 @@ import {
 import {
     changeEventCredenciamentoValue,
     getAllActivitiesInEvent,
+    getAllActivitiesInEventOrdenateByTipo,
     getAllEventsByIdUser,
     getAllSubscribersInEvent,
     getFinancialInformation,
+    getLotesInEvent,
     registerParticipanteInEvent,
     updateParticipantInformations,
 } from "./controllers/eventController";
@@ -27,14 +29,16 @@ const routes = Router();
 
 // Rotas Públicas
 routes.post("/login", loginUser);
+routes.get("/events/:event_id/lotes", getLotesInEvent);
 routes.post("/register/:event_id", registerParticipanteInEvent);
+routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", realizarPagemento);
+routes.get("/events/:id_evento/atividades", getAllActivitiesInEventOrdenateByTipo);
 
 // Rotas para usuários (com autenticação)
 const userRoutes = Router();
 userRoutes.use(checkToken);
 userRoutes.get("/user/payment/:payment_id", getUserInscricao);
 userRoutes.get("/event/:event_id/inscricao/:user_id", getUserInEvent);
-userRoutes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", realizarPagemento);
 userRoutes.put("/admin/user/:user_id", updateParticipantInformations);
 userRoutes.put("/admin/lote/:lote_id/inscricoes/:user_id", updatePaymentStatus);
 
