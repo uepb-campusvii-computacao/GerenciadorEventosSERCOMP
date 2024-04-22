@@ -5,7 +5,6 @@ import { RegisterUserRequestParams } from "../interfaces/registerUserRequestPara
 import {
   findAllActivitiesInEvent,
   findAllEvents,
-  getLotesByEventID,
   registerParticipante,
 } from "../repositories/eventRepository";
 import {
@@ -17,6 +16,7 @@ import {
   updateParticipante
 } from "../repositories/userInscricaoRepository";
 import { findActivitiesInEvent } from "../repositories/activityRepository";
+import { getLotesAtivosByEventID } from "../repositories/loteRepository";
 
 export async function registerParticipanteInEvent(req: Request, res: Response) {
   try {
@@ -41,7 +41,7 @@ export async function getLotesInEvent(req: Request, res: Response){
   try {
     const { event_id } = req.params;
 
-    const lotes_in_event = await getLotesByEventID(event_id);
+    const lotes_in_event = await getLotesAtivosByEventID(event_id);
 
     return res.status(200).json(lotes_in_event);
   } catch (error) {

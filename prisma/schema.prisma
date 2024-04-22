@@ -46,6 +46,7 @@ model Lote {
   preco         Float
   nome          String
   descricao     String?
+  ativo        Boolean         @default(true)
   evento        Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
   userInscricao UserInscricao[]
 

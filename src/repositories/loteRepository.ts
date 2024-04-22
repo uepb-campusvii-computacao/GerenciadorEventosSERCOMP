@@ -10,3 +10,13 @@ export async function findLoteById(uuid_lote: string) {
   return lote;
 }
 
+export async function getLotesAtivosByEventID(id_evento: string){
+  const lotes = await prisma.lote.findMany({
+    where: {
+      uuid_evento: id_evento,
+      ativo: true
+    }
+  });
+
+  return lotes;
+}
