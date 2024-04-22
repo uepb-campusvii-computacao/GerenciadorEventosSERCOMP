@@ -128,19 +128,6 @@ export async function isUserRegisteredInEventFromLote(
   return registrationCount > 0;
 }
 
-export async function getLotesByEventID(id_evento: string) {
-  const response = await prisma.evento.findUnique({
-    where: {
-      uuid_evento: id_evento,
-    },
-    select: {
-      lote: true,
-    },
-  });
-
-  return response?.lote;
-}
-
 export async function findAllActivitiesInEvent(uuid_evento: string) {
   const activities = await prisma.evento.findFirst({
     where: {
