@@ -1,32 +1,19 @@
 import { payment } from "../../lib/mercado_pago";
-import { findUserInscricaoByMercadoPagoId } from "../../repositories/userInscricaoRepository";
+import { findUserInscricaoById, findUserInscricaoByMercadoPagoId } from "../../repositories/userInscricaoRepository";
 
-export async function getPayment(payment_id: string) {
-  const payment_data = await payment.get({ id: payment_id })
+export async function getPayment(user_id: string, lote_id: string) {
+  const user_inscricao = await findUserInscricaoById(user_id, lote_id)
+  const payment_data = await payment.get({ id: user_inscricao!.id_payment_mercado_pago })
 
   if (!payment_data) {
     throw new Error("Pagamento não encontrado!");
   }
 
   const transaction_data = {
-    qr_code_base64: payment_data.point_of_interaction?.transaction_data?.qr_code_base64,
+    qr_code_base64: "data:image/png;base64,"+payment_data.point_of_interaction?.transaction_data?.qr_code_base64,
     qr_code: payment_data.point_of_interaction?.transaction_data?.qr_code,
     ticket_url: payment_data.point_of_interaction?.transaction_data?.ticket_url
   }
 
-  const user_inscricao = await findUserInscricaoByMercadoPagoId(
-    payment_data.id!.toString()
-  );
-
-  const response = {
-    user: {
-      ...user_inscricao,
-    },
-    payment_data: {
-      total: payment_data.transaction_amount,
-      ...transaction_data
-    },
-  };
-
-  return response;
+  return transaction_data;
 }

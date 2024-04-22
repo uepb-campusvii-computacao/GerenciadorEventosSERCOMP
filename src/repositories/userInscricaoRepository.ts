@@ -43,6 +43,19 @@ export async function findUserInscricaoByEventId(uuid_user: string, uuid_evento:
   return user_inscricao;
 }
 
+export async function findUserInscricaoById(uuid_user: string, uuid_lote: string){
+  const user_inscricao = await prisma.userInscricao.findUnique({
+    where: {
+      uuid_lote_uuid_user: {
+        uuid_lote,
+        uuid_user
+      }
+    }
+  })
+
+  return user_inscricao;
+}
+
 export async function findUserInscricaoByMercadoPagoId(
   id_payment_mercado_pago: string
 ) {
