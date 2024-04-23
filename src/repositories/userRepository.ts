@@ -2,7 +2,7 @@ import { Usuario } from "@prisma/client";
 import { CreateUserParams } from "../interfaces/createUserParams";
 import { prisma } from "../lib/prisma";
 
-export async function getOrCreateUser({
+export async function createUser({
   nome,
   nome_cracha,
   email,
@@ -11,7 +11,7 @@ export async function getOrCreateUser({
   const user = await findUserByEmail(email);
 
   if (user) {
-    return user;
+    throw new Error("Email já cadastrado");
   }
 
   const new_user = await prisma.usuario.create({
@@ -34,25 +34,6 @@ export async function findUserByEmail(email: string) {
   });
 
   return user;
-}
-
-export async function createUser({
-  nome,
-  nome_cracha,
-  email,
-  instituicao,
-}: CreateUserParams) {
-
-  const new_user = await prisma.usuario.create({
-    data: {
-      nome,
-      nome_cracha,
-      email,
-      instituicao,
-    },
-  });
-
-  return new_user.uuid_user;
 }
 
 export async function updateUser(
@@ -91,4 +72,12 @@ export async function findUserById(uuid_user: string) {
   });
 
   return user;
+}
+
+export async function deleteUserById(uuid_user: string) {
+  await prisma.usuario.delete({
+    where: {
+      uuid_user,
+    },
+  });
 }

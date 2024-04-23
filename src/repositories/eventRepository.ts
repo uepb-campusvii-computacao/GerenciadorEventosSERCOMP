@@ -5,7 +5,7 @@ import {
   createUserAtividade,
   findAllSubscribersInActivity,
 } from "./userAtividadeRepository";
-import { getOrCreateUser } from "./userRepository";
+import { createUser } from "./userRepository";
 
 export async function findAllEvents() {
   const response = await prisma.evento.findMany();
@@ -51,8 +51,9 @@ export async function registerParticipante({
   atividades,
   lote_id,
 }: RegisterParticipanteParams) {
-  return prisma.$transaction(async () => {
-    const user = await getOrCreateUser({
+  let user;
+  try {
+    user = await createUser({
       nome,
       nome_cracha,
       email,
@@ -60,7 +61,7 @@ export async function registerParticipante({
     });
 
     if (await isUserRegisteredInEventFromLote(user.uuid_user, lote_id)) {
-      throw new Error("Você ja se cadastrou nesse evento!");
+      throw new Error("Você já se cadastrou nesse evento!");
     }
 
     const activities_ids = [
@@ -74,7 +75,7 @@ export async function registerParticipante({
         const activity = await findActivityById(uuid_atividade);
 
         if (!activity) {
-          throw new Error("Atividade inválido!");
+          throw new Error("Atividade inválida!");
         }
 
         if (activity.max_participants) {
@@ -84,7 +85,7 @@ export async function registerParticipante({
 
           if (total_participants >= activity.max_participants) {
             throw new Error(
-              `A atividade ${activity.nome} já está esgotou as vagas.`
+              `A atividade ${activity.nome} já esgotou as vagas.`
             );
           }
         }
@@ -94,14 +95,24 @@ export async function registerParticipante({
     }
 
     return await createPayment(user.uuid_user, lote_id);
-  });
+  } catch (error) {
+    // Se ocorrer um erro, exclua o usuário
+    if (user) {
+      await prisma.usuario.delete({
+        where: {
+          uuid_user: user.uuid_user,
+        },
+      });
+    }
+    throw error; // Rejeite a promessa com o erro original
+  }
 }
 
 export async function isUserRegisteredInEventFromLote(
   user_id: string,
   lote_id: string
 ): Promise<boolean> {
-  const lote = await prisma.lote.findUnique({
+  const lote = await prisma.lote.findUniqueOrThrow({
     where: {
       uuid_lote: lote_id,
     },
@@ -155,4 +166,3 @@ export async function findAllActivitiesInEvent(uuid_evento: string) {
 
   return activities;
 }
-
