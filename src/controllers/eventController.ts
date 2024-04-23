@@ -17,7 +17,6 @@ import {
 } from "../repositories/userInscricaoRepository";
 import { findActivitiesInEvent } from "../repositories/activityRepository";
 import { getLotesAtivosByEventID } from "../repositories/loteRepository";
-import { deleteUserById } from "../repositories/userRepository";
 
 export async function registerParticipanteInEvent(req: Request, res: Response) {
   try {
@@ -79,8 +78,6 @@ export async function updateParticipantInformations(
       oficina,
     } = req.body;
 
-    console.log(req.body);
-
     const activities: { id: string; type: TipoAtividade }[] = [];
 
     if (minicurso) {
@@ -117,9 +114,11 @@ export async function updateParticipantInformations(
       if (error.code === "P2002") {
         errorMessage = "Este e-mail já está em uso.";
       }
+    }else if(error instanceof Error){
+      errorMessage = error.message;
     }
 
-    res.status(400).json({ message: errorMessage });
+    return res.status(400).json({ message: errorMessage });
   }
 }
 

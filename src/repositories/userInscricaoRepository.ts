@@ -1,5 +1,6 @@
 import { StatusPagamento, TipoAtividade, Usuario } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { deleteAllActivityByUserAndType, replaceActivity } from "./userAtividadeRepository";
 
 export async function createUserInscricao(
   uuid_user: string,
@@ -174,6 +175,25 @@ function toStatusPagamento(value: string): StatusPagamento {
   return map[value];
 }
 
+export const removeActivityIfTypeNull = async (user_id: string, activities: ActivityUpdate[] = []) => {
+  const minicurso = activities.find(e => e.type === "MINICURSO");
+  const oficina = activities.find(e => e.type === "OFICINA");
+  const workshop = activities.find(e => e.type === "WORKSHOP");
+  const palestra = activities.find(e => e.type === "PALESTRA");
+  if(!minicurso){
+    deleteAllActivityByUserAndType(user_id, "MINICURSO");
+  }
+  if(!oficina){
+    deleteAllActivityByUserAndType(user_id, "OFICINA");
+  }
+  if(!workshop){
+    deleteAllActivityByUserAndType(user_id, "WORKSHOP");
+  }
+  if(!palestra){
+    deleteAllActivityByUserAndType(user_id, "PALESTRA");
+  }
+}
+
 export async function updateParticipante(
   user_id: string,
   nome: string,
@@ -183,7 +203,6 @@ export async function updateParticipante(
   status_pagamento?: string,
   activities: ActivityUpdate[] = []
 ): Promise<Usuario> {
-  
   const updatedUser = await prisma.usuario.update({
     where: { uuid_user: user_id },
     data: {
@@ -194,44 +213,23 @@ export async function updateParticipante(
     },
   });
 
-  const replaceActivity = async (
-    userId: string,
-    activityId: string,
-    activityType: TipoAtividade
-  ) => {
-    await prisma.userAtividade.deleteMany({
-      where: {
-        uuid_user: userId,
-        atividade: {
-          tipo_atividade: activityType,
-        },
-      },
-    });
+  await removeActivityIfTypeNull(user_id, activities);
 
-    await prisma.userAtividade.create({
-      data: {
-        uuid_user: userId,
-        uuid_atividade: activityId,
-      },
-    });
-  };
-
-  const updateActivities = activities.map((activity) =>{
-    console.log(activity)
-    replaceActivity(user_id, activity.id, activity.type)}
+  const updateActivities = activities.map((activity) =>
+    replaceActivity(user_id, activity.id, activity.type)
   );
 
   let updatePaymentStatus;
-  if(status_pagamento){
-    const status = toStatusPagamento(status_pagamento)
+  if (status_pagamento) {
+    const status = toStatusPagamento(status_pagamento);
     updatePaymentStatus = prisma.userInscricao.updateMany({
       where: {
         uuid_user: user_id,
       },
       data: {
-        status_pagamento : status,
+        status_pagamento: status,
       },
-    })
+    });
   }
 
   await Promise.all([...updateActivities, updatePaymentStatus]);
