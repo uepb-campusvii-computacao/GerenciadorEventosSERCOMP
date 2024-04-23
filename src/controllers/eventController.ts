@@ -2,21 +2,21 @@ import { TipoAtividade } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
 import { RegisterUserRequestParams } from "../interfaces/registerUserRequestParam";
-import { findActivitiesInEvent } from "../repositories/activityRepository";
 import {
   findAllActivitiesInEvent,
   findAllEvents,
   registerParticipante,
 } from "../repositories/eventRepository";
-import { getLotesAtivosByEventID } from "../repositories/loteRepository";
 import {
   changeCredenciamentoValue,
   findAllEventsByUserId,
   findUserInscricaoByEventId,
   findUserInscriptionStatus,
   projectionTableCredenciamento,
-  updateParticipante
+  updateParticipante,
 } from "../repositories/userInscricaoRepository";
+import { findActivitiesInEvent } from "../repositories/activityRepository";
+import { getLotesAtivosByEventID } from "../repositories/loteRepository";
 
 export async function registerParticipanteInEvent(req: Request, res: Response) {
   try {
@@ -26,18 +26,29 @@ export async function registerParticipanteInEvent(req: Request, res: Response) {
       instituicao,
       nome_cracha,
       atividades,
-      lote_id
+      lote_id,
     }: RegisterUserRequestParams = req.body;
 
-    const user = await registerParticipante({nome, email, instituicao, nome_cracha, atividades, lote_id})
+    const user = await registerParticipante({
+      nome,
+      email,
+      instituicao,
+      nome_cracha,
+      atividades,
+      lote_id,
+    });
 
     return res.status(200).json(user);
   } catch (error) {
-    return res.status(400).json(error);
+    if (error instanceof Error) {
+      return res.status(400).send(error.message);
+    } else {
+      return res.status(400).json(error);
+    }
   }
 }
 
-export async function getLotesInEvent(req: Request, res: Response){
+export async function getLotesInEvent(req: Request, res: Response) {
   try {
     const { event_id } = req.params;
 
@@ -45,11 +56,14 @@ export async function getLotesInEvent(req: Request, res: Response){
 
     return res.status(200).json(lotes_in_event);
   } catch (error) {
-    return res.status(400).send("informações inválidas")
+    return res.status(400).send("informações inválidas");
   }
 }
 
-export async function updateParticipantInformations(req: Request, res: Response) {
+export async function updateParticipantInformations(
+  req: Request,
+  res: Response
+) {
   try {
     const { user_id } = req.params;
 
@@ -86,7 +100,7 @@ export async function updateParticipantInformations(req: Request, res: Response)
       instituicao,
       status_pagamento,
       activities
-    );    
+    );
 
     return res.status(200).json({
       message: "Dados alterados com sucesso!",
@@ -136,7 +150,7 @@ export async function getAllSubscribersInEvent(req: Request, res: Response) {
       return res.status(400).send("Evento não encontrado");
     }
 
-    return res.status(200).json({all_subscribers});
+    return res.status(200).json({ all_subscribers });
   } catch (error) {
     console.log(error);
     return res.status(400).send(error);
@@ -160,7 +174,7 @@ export async function changeEventCredenciamentoValue(
 
     return res.status(200).send("Valor Alterado com sucesso!");
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(400).send("Informações inválidas");
   }
 }
@@ -181,21 +195,24 @@ export async function getAllActivitiesInEvent(req: Request, res: Response) {
   }
 }
 
-export async function getAllActivitiesInEventOrdenateByTipo(req: Request, res: Response){
+export async function getAllActivitiesInEventOrdenateByTipo(
+  req: Request,
+  res: Response
+) {
   try {
     const { id_evento } = req.params;
 
-    const minicursos = await findActivitiesInEvent(id_evento, "MINICURSO")
-    const oficinas = await findActivitiesInEvent(id_evento, "OFICINA")
+    const minicursos = await findActivitiesInEvent(id_evento, "MINICURSO");
+    const oficinas = await findActivitiesInEvent(id_evento, "OFICINA");
     const workshops = await findActivitiesInEvent(id_evento, "WORKSHOP");
 
     return res.status(200).json({
       minicursos,
       oficinas,
-      workshops
-    })
+      workshops,
+    });
   } catch (error) {
-    return res.status(400).send("Informações invalidas!")
+    return res.status(400).send("Informações invalidas!");
   }
 }
 
@@ -207,10 +224,10 @@ export async function getFinancialInformation(req: Request, res: Response) {
 
     const usersRegistered = userInscriptions.length;
     const usersWithPaymentStatusPending = userInscriptions.filter(
-      (inscricao) => inscricao.status_pagamento === 'PENDENTE'
+      (inscricao) => inscricao.status_pagamento === "PENDENTE"
     ).length;
     const usersWithPaymentStatusRealizado = userInscriptions.filter(
-      (inscricao) => inscricao.status_pagamento === 'REALIZADO'
+      (inscricao) => inscricao.status_pagamento === "REALIZADO"
     );
 
     let totalArrecadado = 0;
@@ -225,6 +242,8 @@ export async function getFinancialInformation(req: Request, res: Response) {
     });
   } catch (error) {
     console.error("Erro ao obter informações financeiras:", error);
-    return res.status(500).json({ error: 'Erro ao obter informações financeiras' });
+    return res
+      .status(500)
+      .json({ error: "Erro ao obter informações financeiras" });
   }
 }
