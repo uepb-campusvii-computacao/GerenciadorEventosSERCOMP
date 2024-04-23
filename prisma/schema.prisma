@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  uuid_user     String          @id @default(uuid())
+  nome          String
+  nome_cracha   String
+  instituicao   String
+  email         String          @unique
+  senha         String?
+  active        Boolean         @default(true)
+  perfil        Perfil          @default(PARTICIPANTE)
+  evento        Evento[]
+  userAtividade UserAtividade[]
+  userInscricao UserInscricao[]
+
+  @@map("tb_usuario")
+}
+
+model Evento {
+  uuid_evento     String      @id @default(uuid())
+  uuid_user_owner String
+  nome            String
+  usuario         Usuario     @relation(fields: [uuid_user_owner], references: [uuid_user])
+  lote            Lote[]
+  atividade       Atividade[]
+
+  @@map("tb_evento")
+}
+
+model Lote {
+  uuid_lote     String          @id @default(uuid())
+  uuid_evento   String
+  preco         Float
+  nome          String
+  descricao     String?
+  ativo        Boolean         @default(true)
+  evento        Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
+  userInscricao UserInscricao[]
+
+  @@map("tb_lote")
+}
+
+model Atividade {
+  uuid_atividade   String          @id @default(uuid())
+  uuid_evento      String
+  nome             String
+  descricao        String?
+  max_participants Int?
+  tipo_atividade   TipoAtividade   @default(MINICURSO)
+  evento           Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
+  userAtividade    UserAtividade[]
+
+  @@map("tb_atividade")
+}
+
+model UserAtividade {
+  uuid_user      String
+  uuid_atividade String
+  presenca       Boolean   @default(false)
+  user           Usuario   @relation(fields: [uuid_user], references: [uuid_user])
+  atividade      Atividade @relation(fields: [uuid_atividade], references: [uuid_atividade])
+
+  @@id([uuid_user, uuid_atividade])
+  @@map("tb_usuario_atividade")
+}
+
+model UserInscricao {
+  uuid_user               String
+  uuid_lote               String
+  credenciamento          Boolean         @default(false)
+  id_payment_mercado_pago String
+  expiration_datetime     DateTime
+  status_pagamento        StatusPagamento @default(PENDENTE)
+  usuario                 Usuario         @relation(fields: [uuid_user], references: [uuid_user])
+  lote                    Lote            @relation(fields: [uuid_lote], references: [uuid_lote])
+
+  @@id([uuid_lote, uuid_user])
+  @@map("tb_usuario_inscricao")
+}
+
+enum Perfil {
+  ADMIN
+  PARTICIPANTE
+}
+
+enum TipoAtividade {
+  MINICURSO
+  WORKSHOP
+  OFICINA
+  PALESTRA
+}
+
+enum StatusPagamento {
+  PENDENTE
+  REALIZADO
+  EXPIRADO
+}
