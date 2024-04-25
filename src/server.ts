@@ -10,9 +10,10 @@ const app = express();
 app.use(express.json());
 
 const FRONTEND_URL = process.env.FRONTEND_URL || ""
+const GERENCIADOR_URL = process.env.GERENCIADOR_URL || ""
 
 app.use(cors({
-    origin: [FRONTEND_URL],
+    origin: [FRONTEND_URL, GERENCIADOR_URL],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, 
 }));
