@@ -116,6 +116,11 @@ export async function findAllSubscribersInActivityExceptCurrentUser(
         },
       },
     },
+    orderBy: {
+      user: {
+        nome: 'asc'
+      }
+    }
   });
 
   return subscribers;
@@ -137,6 +142,11 @@ export async function findAllSubscribersInActivity(uuid_atividade: string) {
         },
       },
     },
+    orderBy: {
+      user: {
+        nome: 'asc'
+      }
+    }
   });
 
   return subscribers;
@@ -184,7 +194,7 @@ export async function replaceActivity(
 ): Promise<void> {
   await checkIfActivityHasVacancy(activityId, userId);
 
-  await deleteAllActivityByUserAndType(userId, activityType);  
+  await deleteAllActivityByUserAndType(userId, activityType);
 
   await prisma.userAtividade.create({
     data: {
