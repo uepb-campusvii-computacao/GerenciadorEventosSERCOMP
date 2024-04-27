@@ -258,6 +258,11 @@ export const projectionTableCredenciamento = async  (event_id: string) => {
       status_pagamento: true,
       credenciamento: true,
     },
+    orderBy: {
+      usuario: {
+        nome: 'asc'
+      }
+    }
   });
 
   return users.map((userInscricao) => ({
@@ -306,6 +311,11 @@ export async function findAllUserInEventByStatusPagamento(
         },
       },
     },
+    orderBy: {
+      usuario: {
+        nome: 'asc'
+      }
+    }
   });
 
   return users;

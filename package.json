@@ -4,7 +4,7 @@
   "description": "Gerenciador de Eventos para o SERCOMP | UEPB CCEA CAMPUS VII",
   "main": "index.js",
   "engines": {
-    "node": "21"
+    "node": "20"
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
