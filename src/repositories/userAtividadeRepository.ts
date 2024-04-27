@@ -130,6 +130,13 @@ export async function findAllSubscribersInActivity(uuid_atividade: string) {
   const subscribers = await prisma.userAtividade.findMany({
     where: {
       uuid_atividade,
+      user: {
+        userInscricao: {
+          some: {
+            status_pagamento: "REALIZADO",
+          },
+        },
+      },
     },
     select: {
       uuid_user: true,
@@ -145,8 +152,8 @@ export async function findAllSubscribersInActivity(uuid_atividade: string) {
     orderBy: {
       user: {
         nome: 'asc'
-      }
-    }
+      },
+    },
   });
 
   return subscribers;
