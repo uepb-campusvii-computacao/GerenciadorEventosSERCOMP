@@ -1,6 +1,6 @@
-import { StatusPagamento } from "@prisma/client";
 import { Request, Response } from "express";
 import jsonwebtoken from "jsonwebtoken";
+import { UpdatePaymentStatusParams } from "../interfaces/updatePaymentStatusParams";
 import { UserLoginParams } from "../interfaces/userLoginParams";
 import { findLoteById } from "../repositories/loteRepository";
 import {
@@ -54,10 +54,12 @@ export async function loginUser(req: Request, res: Response) {
 export async function realizarPagemento(req: Request, res: Response) {
   try {
     const { lote_id, user_id } = req.params;
+    const { action } = req.body;
 
-    console.log("teste");
-    await changeStatusPagamentoToREALIZADO(lote_id, user_id);
-
+    if (action === "payment.updated") {
+      await changeStatusPagamentoToREALIZADO(lote_id, user_id);
+    }    
+    
     return res.status(200).send("Valor alterado");
   } catch (error) {
     return res.status(400).send("informações inválidas");
@@ -137,13 +139,11 @@ export async function getUserInEvent(req: Request, res: Response) {
 export async function updatePaymentStatus(req: Request, res: Response) {
   try {
     const { lote_id, user_id } = req.params;
-    const { action } = req.body;
+    const { status_pagamento }: UpdatePaymentStatusParams = req.body;
 
-    if (action === "payment.updated") {
-      await changeStatusPagamento(lote_id, user_id, StatusPagamento.REALIZADO);
-    }
+    await changeStatusPagamento(lote_id, user_id, status_pagamento);
 
-    res.status(200).send();
+    res.status(200).send("Alterado com sucesso!");
   } catch (error) {
     return res.status(400).send(error);
   }
