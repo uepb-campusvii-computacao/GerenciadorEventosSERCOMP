@@ -1,7 +1,8 @@
+import { StatusPagamento } from "@prisma/client";
 import { Request, Response } from "express";
 import jsonwebtoken from "jsonwebtoken";
-import { UpdatePaymentStatusParams } from "../interfaces/updatePaymentStatusParams";
 import { UserLoginParams } from "../interfaces/userLoginParams";
+import { findLoteById } from "../repositories/loteRepository";
 import {
   findActivitiesByUserId
 } from "../repositories/userAtividadeRepository";
@@ -17,7 +18,6 @@ import {
 } from "../repositories/userRepository";
 import { getPayment } from "../services/payments/getPayment";
 import { checkPassword } from "../services/user/checkPassword";
-import { findLoteById } from "../repositories/loteRepository";
 
 export async function loginUser(req: Request, res: Response) {
   const params: UserLoginParams = req.body;
@@ -137,11 +137,13 @@ export async function getUserInEvent(req: Request, res: Response) {
 export async function updatePaymentStatus(req: Request, res: Response) {
   try {
     const { lote_id, user_id } = req.params;
-    const { status_pagamento }: UpdatePaymentStatusParams = req.body;
+    const { action } = req.body;
 
-    await changeStatusPagamento(lote_id, user_id, status_pagamento);
+    if (action === "payment.updated") {
+      await changeStatusPagamento(lote_id, user_id, StatusPagamento.REALIZADO);
+    }
 
-    res.status(200).send("Alterado com sucesso!");
+    res.status(200).send();
   } catch (error) {
     return res.status(400).send(error);
   }
