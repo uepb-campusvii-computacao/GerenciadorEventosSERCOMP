@@ -1,23 +1,24 @@
-import { StatusPagamento, TipoAtividade, Usuario } from "@prisma/client";
+import { Prisma, StatusPagamento, TipoAtividade, Usuario } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { deleteAllActivityByUserAndType, replaceActivity } from "./userAtividadeRepository";
 
 export async function createUserInscricao(
-  uuid_user: string,
-  uuid_lote: string,
-  id_payment_mercado_pago: string,
-  expiration_datetime: string
+  tx: Prisma.TransactionClient,
+  user_uuid: string,
+  lote_id: string,
+  payment_id: string,
+  expiration_date: string,
 ) {
-  const user_inscricao = await prisma.userInscricao.create({
+  return await tx.userInscricao.create({
     data: {
-      uuid_user,
-      uuid_lote,
-      expiration_datetime,
-      id_payment_mercado_pago,
+      uuid_user : user_uuid,
+      uuid_lote : lote_id,
+      credenciamento: false,
+      id_payment_mercado_pago: payment_id,
+      expiration_datetime: expiration_date,
+      status_pagamento: "PENDENTE",
     },
   });
-
-  return user_inscricao;
 }
 
 export async function findLoteIdAndUserIdByEmail(event_id: string, email: string) {
