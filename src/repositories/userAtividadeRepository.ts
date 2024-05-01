@@ -1,6 +1,7 @@
-import { TipoAtividade } from "@prisma/client";
+import { Prisma, TipoAtividade } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { findActivityById } from "./activityRepository";
+import { RegisterParticipanteParams } from "./eventRepository";
 
 export async function createUserAtividade(
   uuid_user: string,
@@ -12,6 +13,49 @@ export async function createUserAtividade(
       uuid_atividade,
     },
   });
+}
+
+export async function registerUserInActivities(
+  tx: Prisma.TransactionClient,
+  user_uuid: string,
+  atividades: RegisterParticipanteParams['atividades'],
+) {
+  const activities_ids = [
+    atividades?.minicurso_id,
+    atividades?.workshop_id,
+    atividades?.oficina_id,
+  ];
+
+  for (const uuid_atividade of activities_ids) {
+    if (uuid_atividade) {
+      const activity = await tx.atividade.findUnique({
+        where: {
+          uuid_atividade,
+        },
+      });
+
+      if (!activity) {
+        throw new Error("Atividade não encontrada");
+      }
+
+      const count = await tx.userAtividade.count({
+        where: {
+          uuid_atividade,
+        },
+      });
+
+      if (activity.max_participants && count >= activity.max_participants) {
+        throw new Error(`A atividade ${activity.nome} está cheia`);
+      }
+
+      await tx.userAtividade.create({
+        data: {
+          uuid_user: user_uuid,
+          uuid_atividade,
+        },
+      });
+    }
+  }
 }
 
 export async function changeUserAtividade(

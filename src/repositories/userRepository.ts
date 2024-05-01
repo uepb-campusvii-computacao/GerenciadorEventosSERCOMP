@@ -1,20 +1,32 @@
-import { Usuario } from "@prisma/client";
-import { CreateUserParams } from "../interfaces/createUserParams";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { RegisterParticipanteParams } from "./eventRepository";
 
-export async function createUser({
-  nome,
-  nome_cracha,
-  email,
-  instituicao,
-}: CreateUserParams): Promise<Usuario> {
-  const user = await findUserByEmail(email);
+export async function createUser(
+  tx: Prisma.TransactionClient,
+  {
+    nome,
+    nome_cracha,
+    email,
+    instituicao,
+  }: {
+    nome: string;
+    nome_cracha: string;
+    email: string;
+    instituicao: string;
+  },
+) {
+  const existingUser = await tx.usuario.findUnique({
+    where: {
+      email,
+    },
+  });
 
-  if (user) {
-    throw new Error("Email já cadastrado");
+  if (existingUser) {
+    throw new Error('Este e-mail já está cadastrado. Por favor, use outro e-mail.');
   }
 
-  const new_user = await prisma.usuario.create({
+  return await tx.usuario.create({
     data: {
       nome,
       nome_cracha,
@@ -22,8 +34,64 @@ export async function createUser({
       instituicao,
     },
   });
+}
 
-  return new_user;
+async function isUserRegisteredInLote(
+  tx: typeof prisma,
+  user_uuid: string,
+  lote_id: string,
+): Promise<boolean> {
+  const registro = await tx.userInscricao.findFirst({
+    where: {
+      uuid_user: user_uuid,
+      uuid_lote: lote_id,
+    },
+  });
+
+  return Boolean(registro);
+}
+
+async function registerUserInActivities(
+  tx: typeof prisma,
+  user_uuid: string,
+  atividades: RegisterParticipanteParams['atividades'],
+) {
+  const activities_ids = [
+    atividades?.minicurso_id,
+    atividades?.workshop_id,
+    atividades?.oficina_id,
+  ];
+
+  for (const uuid_atividade of activities_ids) {
+    if (uuid_atividade) {
+      const activity = await tx.atividade.findUnique({
+        where: {
+          uuid_atividade,
+        },
+      });
+
+      if (!activity) {
+        throw new Error("Atividade não encontrada");
+      }
+
+      const count = await tx.userAtividade.count({
+        where: {
+          uuid_atividade,
+        },
+      });
+
+      if (activity.max_participants && count >= activity.max_participants) {
+        throw new Error(`A atividade ${activity.nome} está cheia`);
+      }
+
+      await tx.userAtividade.create({
+        data: {
+          uuid_user: user_uuid,
+          uuid_atividade,
+        },
+      });
+    }
+  }
 }
 
 export async function findUserByEmail(email: string) {
@@ -72,12 +140,4 @@ export async function findUserById(uuid_user: string) {
   });
 
   return user;
-}
-
-export async function deleteUserById(uuid_user: string) {
-  await prisma.usuario.delete({
-    where: {
-      uuid_user,
-    },
-  });
 }

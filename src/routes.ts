@@ -17,6 +17,8 @@ import {
     updateParticipantInformations,
 } from "./controllers/eventController";
 import {
+    deleteUser,
+    getLoteIdAndUserId,
     getUserInEvent,
     getUserInformation,
     getUserInscricao,
@@ -32,6 +34,7 @@ const routes = Router();
 routes.post("/login", loginUser);
 routes.get("/events/:event_id/lotes", getLotesInEvent);
 routes.post("/register/:event_id", registerParticipanteInEvent);
+routes.post("/events/:event_id/inscricoes/find", getLoteIdAndUserId);
 routes.get("/lote/:lote_id/inscricoes/user/:user_id/", getUserInformation);
 routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", realizarPagemento);
 routes.get("/events/:id_evento/atividades", getAllActivitiesInEventOrdenateByTipo);
@@ -42,6 +45,7 @@ const userRoutes = Router();
 userRoutes.use(checkToken);
 userRoutes.get("/event/:event_id/inscricao/:user_id", getUserInEvent);
 userRoutes.put("/admin/user/:user_id", updateParticipantInformations);
+userRoutes.delete("/admin/user/:user_id", deleteUser);
 userRoutes.put("/admin/lote/:lote_id/inscricoes/:user_id", updatePaymentStatus);
 
 // Rotas para eventos (com autenticação)

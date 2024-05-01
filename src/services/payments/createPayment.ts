@@ -1,47 +1,62 @@
-import { payment } from "../../lib/mercado_pago";
-import { findUserById } from "../../repositories/userRepository";
-import { findLoteById } from "../../repositories/loteRepository";
-import { createUserInscricao } from "../../repositories/userInscricaoRepository";
+import { Prisma } from "@prisma/client";
 import { addDays, format } from "date-fns";
+import { payment } from "../../lib/mercado_pago";
 
-export async function createPayment(user_id: string, lote_id: string) {
-    const user = await findUserById(user_id);
+export async function createPayment(
+  tx: Prisma.TransactionClient,
+  user_uuid: string,
+  lote_id: string,
+) {
+  const user = await tx.usuario.findUnique({
+    where: {
+      uuid_user: user_uuid,
+    },
+  });
 
-    const lote = await findLoteById(lote_id);
+  if (!user) {
+    throw new Error("Usuário não encontrado");
+  }
 
-    const requestOptions = {
-      idempotencyKey: `${user_id}-${lote_id}`,
-    };
+  const lote = await tx.lote.findUnique({
+    where: {
+      uuid_lote : lote_id,
+    },
+  });
 
-    const API_URL = process.env.API_URL || "";
+  if (!lote) {
+    throw new Error("Lote não encontrado");
+  }
 
-    const current_date = new Date();
+  const current_date = new Date();
+  const date_of_expiration = addDays(current_date, 10);
 
-    const date_of_expiration = addDays(current_date, 10)
- 
-    const body = {
-      transaction_amount: lote.preco,
-      description: "Compra de ingresso",
-      payment_method_id: "pix",
-      date_of_expiration: format(date_of_expiration, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-      notification_url: `${API_URL}/lote/${lote_id}/user/${user_id}/realizar-pagamento`,
-      payer: {
-        email: user.email,
-      },
-    };
+  const body = {
+    transaction_amount: lote.preco,
+    description: "Compra de ingresso",
+    payment_method_id: "pix",
+    date_of_expiration: format(date_of_expiration, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+    notification_url: `${process.env.API_URL}/lote/${lote_id}/user/${user_uuid}/realizar-pagamento`,
+    payer: {
+      email: user.email,
+    },
+  };
 
-    // Criar pagamento
+  const requestOptions = {
+    idempotencyKey: `${user_uuid}-${lote_id}`,
+  };
+
+  try{
     const response = await payment.create({
       body,
       requestOptions,
     });
 
-    if (!response) {
-      throw new Error("Ocorreu um erro interno no servidor");
-    }
-
-    const userInscricao = createUserInscricao(user_id, lote_id, response.id!.toString(), response.date_of_expiration!.toString());
-
-    return userInscricao;
+    return {
+      payment_id: response.id!.toString(),
+      expiration_date: response.date_of_expiration!,
+    };
+  }catch(error){
+    console.log(error)
+    throw new Error("Erro ao criar o pagamento");
+  }
 }
-
