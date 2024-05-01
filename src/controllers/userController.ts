@@ -3,21 +3,19 @@ import jsonwebtoken from "jsonwebtoken";
 import { UpdatePaymentStatusParams } from "../interfaces/updatePaymentStatusParams";
 import { UserLoginParams } from "../interfaces/userLoginParams";
 import { findLoteById } from "../repositories/loteRepository";
-import {
-  findActivitiesByUserId
-} from "../repositories/userAtividadeRepository";
+import { findActivitiesByUserId } from "../repositories/userAtividadeRepository";
 import {
   changeStatusPagamento,
   changeStatusPagamentoToREALIZADO,
+  findLoteIdAndUserIdByEmail,
   findUserInscricaoByEventId,
-  findUserInscricaoById
+  findUserInscricaoById,
 } from "../repositories/userInscricaoRepository";
-import {
-  findUserByEmail,
-  findUserById
-} from "../repositories/userRepository";
+import { findUserByEmail, findUserById } from "../repositories/userRepository";
 import { getPayment } from "../services/payments/getPayment";
 import { checkPassword } from "../services/user/checkPassword";
+import { FindLoteIdAnduserIdParams } from "../interfaces/findLoteIdAnduserIdParams";
+import { deleteUserByUserId } from "../services/user/deleteUserByUserId";
 
 export async function loginUser(req: Request, res: Response) {
   const params: UserLoginParams = req.body;
@@ -51,6 +49,23 @@ export async function loginUser(req: Request, res: Response) {
   return res.status(200).json({ token: token, user_id: userExists.uuid_user });
 }
 
+export async function getLoteIdAndUserId(req: Request, res: Response) {
+  try {
+    const { event_id } = req.params;
+
+    const { email }: FindLoteIdAnduserIdParams = req.body;
+
+    const response = await findLoteIdAndUserIdByEmail(event_id, email);
+
+    return res.status(200).json(response);
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(400).send(error.message);
+    }
+    return res.status(400).send(error);
+  }
+}
+
 export async function realizarPagemento(req: Request, res: Response) {
   try {
     const { lote_id, user_id } = req.params;
@@ -58,8 +73,8 @@ export async function realizarPagemento(req: Request, res: Response) {
 
     if (action === "payment.updated") {
       await changeStatusPagamentoToREALIZADO(lote_id, user_id);
-    }    
-    
+    }
+
     return res.status(200).send("Valor alterado");
   } catch (error) {
     return res.status(400).send("informações inválidas");
@@ -73,21 +88,20 @@ export async function getUserInformation(req: Request, res: Response) {
     const atividades = await findActivitiesByUserId(user_id);
     const user = await findUserById(user_id);
     const user_inscricao = await findUserInscricaoById(user_id, lote_id);
-    const lote = await findLoteById(lote_id)
+    const lote = await findLoteById(lote_id);
 
     const response = {
       user_name: user.nome,
       inscricao: {
         status: user_inscricao?.status_pagamento,
         nome_lote: lote.nome,
-        preco: lote.preco
+        preco: lote.preco,
       },
-      atividades: atividades.map(atividade => ({
+      atividades: atividades.map((atividade) => ({
         nome: atividade.nome,
         tipo: atividade.tipo_atividade,
-      }))
-    }
-
+      })),
+    };
 
     return res.status(200).json(response);
   } catch (error) {
@@ -144,6 +158,18 @@ export async function updatePaymentStatus(req: Request, res: Response) {
     await changeStatusPagamento(lote_id, user_id, status_pagamento);
 
     res.status(200).send("Alterado com sucesso!");
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+}
+
+export async function deleteUser(req: Request, res: Response) {
+  try {
+    const { user_id } = req.params;
+
+    await deleteUserByUserId(user_id);
+
+    return res.status(200).send("Usuario deletado");
   } catch (error) {
     return res.status(400).send(error);
   }
