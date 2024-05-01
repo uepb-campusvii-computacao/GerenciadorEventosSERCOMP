@@ -31,8 +31,21 @@ export async function findActivitiesInEvent(uuid_evento: string, tipo_atividade:
       AND: {
         tipo_atividade
       }
+    },
+    select: {
+      uuid_atividade: true,
+      nome: true,
+      max_participants: true,
+      tipo_atividade: true,
+      _count: {
+        select: {
+          userAtividade: true
+        }
+      }
     }
-  })
+  });
 
-  return activities;
+  return activities.map(activity => ({
+    ...activity, _count: activity._count.userAtividade
+  }))
 }
