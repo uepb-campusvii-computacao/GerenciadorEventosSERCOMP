@@ -20,6 +20,25 @@ export async function createUserInscricao(
   return user_inscricao;
 }
 
+export async function findLoteIdAndUserIdByEmail(event_id: string, email: string) {
+  const user = await prisma.usuario.findUniqueOrThrow({
+    where: {
+      email
+    }
+  })
+
+  const lote = await prisma.lote.findFirstOrThrow({
+    where: {
+      uuid_evento: event_id
+    }
+  })
+
+  return {
+    uuid_user: user?.uuid_user,
+    uuid_lote: lote?.uuid_lote
+  }
+}
+
 export async function findUserInscricaoByEventId(uuid_user: string, uuid_evento: string) {
   //Só pode existir 1 inscrição por evento, independetemente da quantidade de lotes!
   const lote = await prisma.lote.findFirst({

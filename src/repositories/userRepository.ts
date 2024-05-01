@@ -74,10 +74,4 @@ export async function findUserById(uuid_user: string) {
   return user;
 }
 
-export async function deleteUserById(uuid_user: string) {
-  await prisma.usuario.delete({
-    where: {
-      uuid_user,
-    },
-  });
-}
+
