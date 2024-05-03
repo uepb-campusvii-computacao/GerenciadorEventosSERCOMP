@@ -59,7 +59,7 @@ model Atividade {
   nome             String
   descricao        String?
   max_participants Int?
-  tipo_atividade   TipoAtividade   @default(MINICURSO)
+  atividade   TipoAtividade   @default(MINICURSO)
   evento           Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
   userAtividade    UserAtividade[]
 
