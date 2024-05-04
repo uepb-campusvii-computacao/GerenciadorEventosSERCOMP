@@ -273,6 +273,7 @@ export const projectionTableCredenciamento = async  (event_id: string) => {
           uuid_user: true,
           nome: true,
           email: true,
+          nome_cracha: true,
         },
       },
       status_pagamento: true,
@@ -288,6 +289,7 @@ export const projectionTableCredenciamento = async  (event_id: string) => {
   return users.map((userInscricao) => ({
     uuid_user: userInscricao.usuario.uuid_user,
     nome: userInscricao.usuario.nome,
+    nome_cracha: userInscricao.usuario.nome_cracha,
     email: userInscricao.usuario.email,
     status_pagamento: userInscricao.status_pagamento,
     credenciamento: userInscricao.credenciamento,
