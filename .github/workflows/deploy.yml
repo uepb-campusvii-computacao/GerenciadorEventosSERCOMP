@@ -41,13 +41,11 @@ jobs:
       with:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         ARGS: "-rlgoDzvc -i --delete"
+        SOURCE: "dist/"
         REMOTE_HOST: ${{ secrets.HOST }}
         REMOTE_USER: ${{ secrets.USERNAME }}
         TARGET: ${{ secrets.REMOTE_TARGET }}
+        EXCLUDE: "/dist/, /node_modules/"
 
-    - name: Stop pm2
-      run: pm2 stop nodedeploy
-      if: ${{failure()}}
-    
-    - name: Start pm2
-      run: pm2 start dist/server.js --name nodedeploy
+    - name: Start the project
+      run: node server.js
