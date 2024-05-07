@@ -16,6 +16,9 @@ jobs:
       with:
         node-version: '21.x'
 
+    - name: Install npm dependencies 
+      run: npm install 
+
     - name: Set up environment variables
       run: |
         echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
@@ -25,13 +28,12 @@ jobs:
         echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> .env
         echo "GERENCIADOR_URL=${{ secrets.GERENCIADOR_URL }}" >> .env
         echo "PORT=${{ secrets.PORT }}" >> .env
-        echo ${{secrets.SSH_PRIVATE_KEY}}
   
-    - name: Install npm dependencies and build
-      run: |
-       npm install 
-       npm run build --if-present
-       npx prisma migrate deploy
+    - name: Run prisma migrations
+      run: npx prisma migrate deploy
+
+    - name: Build project  
+      run: npm run build --if-present
 
 
     - name: Deploy to Server
