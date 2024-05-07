@@ -46,6 +46,5 @@ jobs:
         REMOTE_USER: ${{ secrets.USERNAME }}
         TARGET: ${{ secrets.REMOTE_TARGET }}
         EXCLUDE: "/dist/, /node_modules/"
-
-    - name: Start the project
-      run: node server.js
+        SCRIPT_AFTER: |
+            node server.js
