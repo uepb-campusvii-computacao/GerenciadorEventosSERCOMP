@@ -46,4 +46,4 @@ jobs:
         TARGET: ${{ secrets.REMOTE_TARGET }}
 
     - name: Run server
-      uses: npm run start
+      run: npm run start
