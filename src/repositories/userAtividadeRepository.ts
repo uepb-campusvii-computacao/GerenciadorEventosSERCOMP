@@ -177,7 +177,9 @@ export async function findAllSubscribersInActivity(uuid_atividade: string) {
       user: {
         userInscricao: {
           some: {
-            status_pagamento: "REALIZADO",
+            status_pagamento: {
+              in: ["REALIZADO", "GRATUITO"],
+            }
           },
         },
       },
