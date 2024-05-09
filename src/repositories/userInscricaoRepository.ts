@@ -185,16 +185,6 @@ export interface ActivityUpdate {
   type: TipoAtividade;
 }
 
-function toStatusPagamento(value: string): StatusPagamento {
-  const map: Record<string, StatusPagamento> = {
-    "PENDENTE": StatusPagamento.PENDENTE,
-    "REALIZADO": StatusPagamento.REALIZADO,
-    "EXPIRADO": StatusPagamento.EXPIRADO,
-  };
-
-  return map[value];
-}
-
 export const removeActivityIfTypeNull = async (user_id: string, activities: ActivityUpdate[] = []) => {
   const minicurso = activities.find(e => e.type === "MINICURSO");
   const oficina = activities.find(e => e.type === "OFICINA");
@@ -220,7 +210,7 @@ export async function updateParticipante(
   nome_cracha: string,
   email: string,
   instituicao: string,
-  status_pagamento?: string,
+  status_pagamento?: StatusPagamento,
   activities: ActivityUpdate[] = []
 ): Promise<Usuario> {
   const updatedUser = await prisma.usuario.update({
@@ -241,13 +231,12 @@ export async function updateParticipante(
 
   let updatePaymentStatus;
   if (status_pagamento) {
-    const status = toStatusPagamento(status_pagamento);
     updatePaymentStatus = prisma.userInscricao.updateMany({
       where: {
         uuid_user: user_id,
       },
       data: {
-        status_pagamento: status,
+        status_pagamento,
       },
     });
   }
