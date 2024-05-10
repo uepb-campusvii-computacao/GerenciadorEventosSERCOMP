@@ -17,9 +17,35 @@ export async function findActivityPubInfoById(uuid_atividade: string) {
       uuid_atividade: uuid_atividade,
     },
     select: {
-      nome: true
+      nome: true,
+      descricao: true,
+      tipo_atividade: true,
+      max_participants: true,
     },
   }); 
+
+  return activity;
+}
+
+export async function updateActivityById(
+  uuid_atividade: string,
+  nome: string,
+  descricao: string,
+  tipo_atividade: TipoAtividade,
+  max_participants: number
+){
+  
+  const activity = await prisma.atividade.update({
+    where: {
+      uuid_atividade,
+    },
+    data: {
+      nome,
+      descricao,
+      tipo_atividade,
+      max_participants
+    }
+  });
 
   return activity;
 }

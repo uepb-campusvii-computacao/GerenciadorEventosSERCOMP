@@ -4,6 +4,7 @@ import {
     getActivityById,
     getSubscribersInActivity,
     upadateUserActivity,
+    updateActivity,
 } from "./controllers/activityController";
 import {
     changeEventCredenciamentoValue,
@@ -62,6 +63,7 @@ const activityRoutes = Router();
 activityRoutes.use(checkToken);
 activityRoutes.get("/admin/atividades/:id_atividade/inscricoes", getSubscribersInActivity);
 activityRoutes.get("/admin/atividades/:atividade_id", getActivityById);
+activityRoutes.put("/admin/atividades/:atividade_id", updateActivity);
 activityRoutes.put("/admin/atividades/:atividade_id/inscricoes/:user_id/frequencia", changeActivityPresencaValue);
 activityRoutes.put("/admin/user/:user_id/atividades/troca", upadateUserActivity);
 
