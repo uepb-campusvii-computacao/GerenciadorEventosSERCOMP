@@ -223,9 +223,15 @@ export async function getFinancialInformation(req: Request, res: Response) {
     const userInscriptions = await findUserInscriptionStatus(event_id);
 
     const usersRegistered = userInscriptions.length;
+    
     const usersWithPaymentStatusPending = userInscriptions.filter(
       (inscricao) => inscricao.status_pagamento === "PENDENTE"
     ).length;
+
+    const usersWithPaymentStatusGratuito = userInscriptions.filter(
+      (inscricao) => inscricao.status_pagamento === "GRATUITO"
+    ).length;
+
     const usersWithPaymentStatusRealizado = userInscriptions.filter(
       (inscricao) => inscricao.status_pagamento === "REALIZADO"
     );
@@ -239,6 +245,7 @@ export async function getFinancialInformation(req: Request, res: Response) {
       total_inscritos: usersRegistered,
       total_arrecadado: totalArrecadado,
       inscricoes_pendentes: usersWithPaymentStatusPending,
+      inscricoes_gratuitas: usersWithPaymentStatusGratuito
     });
   } catch (error) {
     console.error("Erro ao obter informações financeiras:", error);
