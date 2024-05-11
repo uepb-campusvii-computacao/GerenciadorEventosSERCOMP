@@ -11,6 +11,7 @@ import {
     getAllActivitiesInEvent,
     getAllActivitiesInEventOrdenateByTipo,
     getAllEventsByIdUser,
+    getAllProductsInEvent,
     getAllSubscribersInEvent,
     getFinancialInformation,
     getLotesInEvent,
@@ -28,12 +29,14 @@ import {
     updatePaymentStatus,
 } from "./controllers/userController";
 import { checkToken } from "./lib/ensureAuthenticate";
-import { createOrder } from "./controllers/orderController";
+import { createOrder, getOrders } from "./controllers/orderController";
 
 const routes = Router();
 
-// Rotas Públicas (Mercado)
+// Rotas Públicas (Mercardo)
 routes.post("/marketplace", createOrder);
+routes.get("/marketplace/user/:user_id", getOrders);
+routes.get("/events/:event_id/produtos", getAllProductsInEvent);
 
 // Rotas Públicas
 routes.post("/login", loginUser);

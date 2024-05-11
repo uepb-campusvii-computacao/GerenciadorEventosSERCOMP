@@ -116,7 +116,7 @@ model Pagamento {
   status_pagamento        StatusPagamento @default(PENDENTE)
   data_pagamento          DateTime?
   usuario                 Usuario         @relation(fields: [uuid_user], references: [uuid_user])
-  Vendas                  Venda[]
+  vendas                   Venda[]
 
   @@map("tb_pagamento")
 }

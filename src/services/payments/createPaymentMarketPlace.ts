@@ -90,14 +90,10 @@ export async function createPaymentMarketPlace(
     };
   
     try {
-      // const response = await payment.create({
-      //   body,
-      //   requestOptions,
-      // });
-  
-      const response = {
-        id: 1234,
-      };
+      const response = await payment.create({
+         body,
+         requestOptions,
+      });
   
       return await tx.pagamento.update({
         where: {
@@ -105,7 +101,7 @@ export async function createPaymentMarketPlace(
         },
         data: {
           valor_total: precoTotal,
-          id_payment_mercado_pago: response.id.toString(),
+          id_payment_mercado_pago: response.id!.toString(),
         },
       });
     } catch (error) {
