@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma";
-import { createPayment } from "../services/payments/createPayment";
+import { createPaymentUserResgistration } from "../services/payments/createPaymentUserRegistration";
 import { isUserRegisteredInLote } from "./loteRepository";
 import { registerUserInActivities } from "./userAtividadeRepository";
 import { createUserInscricao } from "./userInscricaoRepository";
@@ -40,7 +40,7 @@ export async function registerParticipante({
 
     await registerUserInActivities(tx, user.uuid_user, atividades);
 
-    const { payment_id, expiration_date } = await createPayment(tx, user.uuid_user, lote_id);
+    const { payment_id, expiration_date } = await createPaymentUserResgistration(tx, user.uuid_user, lote_id);
 
     return await createUserInscricao(tx, user.uuid_user, lote_id, payment_id, expiration_date);
   });

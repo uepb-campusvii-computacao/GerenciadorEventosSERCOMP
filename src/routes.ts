@@ -28,8 +28,12 @@ import {
     updatePaymentStatus,
 } from "./controllers/userController";
 import { checkToken } from "./lib/ensureAuthenticate";
+import { createOrder } from "./controllers/orderController";
 
 const routes = Router();
+
+// Rotas Públicas (Mercado)
+routes.post("/marketplace", createOrder);
 
 // Rotas Públicas
 routes.post("/login", loginUser);

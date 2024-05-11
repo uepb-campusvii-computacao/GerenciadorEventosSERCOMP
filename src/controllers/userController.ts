@@ -113,7 +113,9 @@ export async function getUserInscricao(req: Request, res: Response) {
   try {
     const { user_id, lote_id } = req.params;
 
-    const payment = await getPayment(user_id, lote_id);
+    const user_inscricao = await findUserInscricaoById(user_id, lote_id)
+
+    const payment = await getPayment(user_inscricao!.id_payment_mercado_pago);
 
     return res.status(200).json(payment);
   } catch (error) {

@@ -1,9 +1,7 @@
 import { payment } from "../../lib/mercado_pago";
-import { findUserInscricaoById, findUserInscricaoByMercadoPagoId } from "../../repositories/userInscricaoRepository";
 
-export async function getPayment(user_id: string, lote_id: string) {
-  const user_inscricao = await findUserInscricaoById(user_id, lote_id)
-  const payment_data = await payment.get({ id: user_inscricao!.id_payment_mercado_pago })
+export async function getPayment(payment_id: string) {
+  const payment_data = await payment.get({ id: payment_id })
 
   if (!payment_data) {
     throw new Error("Pagamento não encontrado!");

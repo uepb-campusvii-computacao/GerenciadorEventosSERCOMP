@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { addDays, format } from "date-fns";
 import { payment } from "../../lib/mercado_pago";
 
-export async function createPayment(
+export async function createPaymentUserResgistration(
   tx: Prisma.TransactionClient,
   user_uuid: string,
   lote_id: string,
