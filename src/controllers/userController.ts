@@ -66,7 +66,7 @@ export async function getLoteIdAndUserId(req: Request, res: Response) {
   }
 }
 
-export async function realizarPagemento(req: Request, res: Response) {
+export async function realizarPagamento(req: Request, res: Response) {
   try {
     const { lote_id, user_id } = req.params;
     const { action } = req.body;

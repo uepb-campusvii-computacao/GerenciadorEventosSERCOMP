@@ -1,6 +1,7 @@
 import { payment } from "../../lib/mercado_pago";
 
 export async function getPayment(payment_id: string) {
+  
   const payment_data = await payment.get({ id: payment_id })
 
   if (!payment_data) {

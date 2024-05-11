@@ -25,17 +25,18 @@ import {
     getUserInformation,
     getUserInscricao,
     loginUser,
-    realizarPagemento,
+    realizarPagamento,
     updatePaymentStatus,
 } from "./controllers/userController";
 import { checkToken } from "./lib/ensureAuthenticate";
-import { createOrder, getOrders } from "./controllers/orderController";
+import { createOrder, getOrders, realizarPagamentoVenda } from "./controllers/orderController";
 
 const routes = Router();
 
 // Rotas Públicas (Mercardo)
 routes.post("/marketplace", createOrder);
 routes.get("/marketplace/user/:user_id", getOrders);
+routes.post("/marketplace/:pagamento_id/realizar-pagamento", realizarPagamentoVenda);
 routes.get("/events/:event_id/produtos", getAllProductsInEvent);
 
 // Rotas Públicas
@@ -44,7 +45,7 @@ routes.get("/events/:event_id/lotes", getLotesInEvent);
 routes.post("/register/:event_id", registerParticipanteInEvent);
 routes.post("/events/:event_id/inscricoes/find", getLoteIdAndUserId);
 routes.get("/lote/:lote_id/inscricoes/user/:user_id/", getUserInformation);
-routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", realizarPagemento);
+routes.post("/lote/:lote_id/user/:user_id/realizar-pagamento", realizarPagamento);
 routes.get("/events/:id_evento/atividades", getAllActivitiesInEventOrdenateByTipo);
 routes.get("/pagamento/user/:user_id/lote/:lote_id", getUserInscricao);
 

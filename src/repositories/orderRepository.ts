@@ -1,4 +1,6 @@
+import { CreateOrderParams } from "../interfaces/createOrderParams";
 import { prisma } from "../lib/prisma";
+import { createPaymentMarketPlace } from "../services/payments/createPaymentMarketPlace";
 
 export async function findAllVendasByUserId(uuid_user: string) {
   const response = prisma.venda.findMany({
@@ -33,3 +35,20 @@ export async function findAllVendasByUserId(uuid_user: string) {
 
   return response;
 }
+
+
+export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: string){
+ 
+  const user_inscricao = await prisma.pagamento.update({
+    where: {
+      uuid_pagamento,
+    },
+    data: {
+      status_pagamento: "REALIZADO"
+    }
+  });
+
+  return user_inscricao;
+
+}
+
