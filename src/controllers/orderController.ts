@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { CreateOrderParams } from "../interfaces/createOrderParams";
 import { createPaymentMarketPlace } from "../services/payments/createPaymentMarketPlace";
-import { changeVendaStatusPagamentoToREALIZADO, findAllVendasByUserId } from "../repositories/orderRepository";
+import { changeVendaStatusPagamentoToREALIZADO, findAllVendasByUserId, findPagamentoById } from "../repositories/orderRepository";
 import { getPayment } from "../services/payments/getPayment";
 
 export async function createOrder(req: Request, res: Response) {
