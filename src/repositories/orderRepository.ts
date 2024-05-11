@@ -39,7 +39,7 @@ export async function findAllVendasByUserId(uuid_user: string) {
 
 export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: string){
  
-  const user_inscricao = await prisma.pagamento.update({
+  const pagamento = await prisma.pagamento.update({
     where: {
       uuid_pagamento,
     },
@@ -48,7 +48,7 @@ export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: stri
     }
   });
 
-  return user_inscricao;
+  return pagamento;
 
 }
 
