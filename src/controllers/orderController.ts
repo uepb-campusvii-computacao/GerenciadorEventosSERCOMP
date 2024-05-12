@@ -51,7 +51,7 @@ export async function realizarPagamentoVenda(req: Request, res: Response) {
     console.log(pagamento_id)
 
     if (action === "payment.updated") {
-      console.log("estou na funcao")
+      console.log("estou na funcao no controller")
       await changeVendaStatusPagamentoToREALIZADO(pagamento_id);
     }
 
