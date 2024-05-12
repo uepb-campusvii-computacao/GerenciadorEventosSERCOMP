@@ -97,8 +97,7 @@ export async function findPagamentoById(uuid_pagamento: string){
 export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: string){
 
   const current_date = new Date();
- 
-  console.log("funcao iniciada no repository")
+
 
   const pagamento = await prisma.pagamento.update({
     where: {
@@ -109,8 +108,6 @@ export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: stri
       status_pagamento: "REALIZADO"
     }
   });
-
-  console.log("funcao feita no repository")
 
   return pagamento;
 
