@@ -66,7 +66,7 @@ export async function getLoteIdAndUserId(req: Request, res: Response) {
   }
 }
 
-export async function realizarPagemento(req: Request, res: Response) {
+export async function realizarPagamento(req: Request, res: Response) {
   try {
     const { lote_id, user_id } = req.params;
     const { action } = req.body;
@@ -113,7 +113,9 @@ export async function getUserInscricao(req: Request, res: Response) {
   try {
     const { user_id, lote_id } = req.params;
 
-    const payment = await getPayment(user_id, lote_id);
+    const user_inscricao = await findUserInscricaoById(user_id, lote_id)
+
+    const payment = await getPayment(user_inscricao!.id_payment_mercado_pago);
 
     return res.status(200).json(payment);
   } catch (error) {

@@ -25,6 +25,8 @@ model Usuario {
   evento        Evento[]
   userAtividade UserAtividade[]
   userInscricao UserInscricao[]
+  Pagamento     Pagamento[]
+  Venda         Venda[]
 
   @@map("tb_usuario")
 }
@@ -36,6 +38,7 @@ model Evento {
   usuario         Usuario     @relation(fields: [uuid_user_owner], references: [uuid_user])
   lote            Lote[]
   atividade       Atividade[]
+  Produto         Produto[]
 
   @@map("tb_evento")
 }
@@ -46,7 +49,7 @@ model Lote {
   preco         Float
   nome          String
   descricao     String?
-  ativo        Boolean         @default(true)
+  ativo         Boolean         @default(true)
   evento        Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
   userInscricao UserInscricao[]
 
@@ -57,7 +60,7 @@ model Atividade {
   uuid_atividade   String          @id @default(uuid())
   uuid_evento      String
   nome             String
-  descricao        String?
+  descricao        String?         @db.Text
   max_participants Int?
   tipo_atividade   TipoAtividade   @default(MINICURSO)
   evento           Evento          @relation(fields: [uuid_evento], references: [uuid_evento])
@@ -89,6 +92,47 @@ model UserInscricao {
 
   @@id([uuid_lote, uuid_user])
   @@map("tb_usuario_inscricao")
+}
+
+model Produto {
+  uuid_produto String  @id @default(uuid())
+  nome         String
+  descricao    String? @db.Text
+  preco        Float
+  estoque      Int     @default(0)
+  imagem_url   String?
+  uuid_evento  String
+  evento       Evento  @relation(fields: [uuid_evento], references: [uuid_evento])
+  Venda        Venda[]
+
+  @@map("tb_produto")
+}
+
+model Pagamento {
+  uuid_pagamento          String          @id @default(uuid())
+  uuid_user               String
+  id_payment_mercado_pago String
+  valor_total             Float
+  status_pagamento        StatusPagamento @default(PENDENTE)
+  data_pagamento          DateTime?
+  data_criacao            DateTime        @default(now())
+  usuario                 Usuario         @relation(fields: [uuid_user], references: [uuid_user])
+  vendas                  Venda[]
+
+  @@map("tb_pagamento")
+}
+
+model Venda {
+  uuid_venda     String    @id @default(uuid())
+  uuid_user      String
+  uuid_produto   String
+  quantidade     Int       @default(1)
+  uuid_pagamento String
+  produto        Produto   @relation(fields: [uuid_produto], references: [uuid_produto])
+  user           Usuario   @relation(fields: [uuid_user], references: [uuid_user])
+  pagamento      Pagamento @relation(fields: [uuid_pagamento], references: [uuid_pagamento])
+
+  @@map("tb_venda")
 }
 
 enum Perfil {

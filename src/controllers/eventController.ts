@@ -17,6 +17,7 @@ import {
 } from "../repositories/userInscricaoRepository";
 import { findActivitiesInEvent } from "../repositories/activityRepository";
 import { getLotesAtivosByEventID } from "../repositories/loteRepository";
+import { findAllProducts } from "../repositories/productRepository";
 
 export async function registerParticipanteInEvent(req: Request, res: Response) {
   try {
@@ -126,6 +127,18 @@ export async function getAllEvents(req: Request, res: Response) {
   const all_events = await findAllEvents();
 
   res.send(all_events);
+}
+
+export async function getAllProductsInEvent(req: Request, res: Response){
+  try {
+    const { event_id } = req.params;
+
+    const response = await findAllProducts(event_id);
+
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).send(error)
+  }
 }
 
 export async function getAllEventsByIdUser(req: Request, res: Response) {
