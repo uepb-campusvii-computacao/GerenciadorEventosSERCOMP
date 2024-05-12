@@ -22,7 +22,7 @@ export async function findAllVendasByUserId(uuid_user: string) {
               nome: true,
             }
           },
-          venda: {
+          vendas: {
             select: {
               quantidade: true,
               produto: {
@@ -61,7 +61,7 @@ export async function findPagamentoById(uuid_pagamento: string){
           id_payment_mercado_pago: true,
           status_pagamento: true,
           valor_total: true,
-          venda: {
+          vendas: {
             select: {
               quantidade: true,
               produto: {
