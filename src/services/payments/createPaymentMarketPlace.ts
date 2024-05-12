@@ -40,12 +40,6 @@ export async function createPaymentMarketPlace({
       let precoTotal = 0;
 
       for (const { uuid_produto, quantidade } of produtos) {
-        // Conta quantos de cada produto foram vendidos
-        const vendidos = await tx.venda.count({
-          where: {
-            uuid_produto: uuid_produto,
-          },
-        });
 
         // Busca o produto
         const produto = await tx.produto.findUnique({
@@ -55,11 +49,20 @@ export async function createPaymentMarketPlace({
         });
 
         // Verifica se há estoque suficiente
-        if (!produto || produto.estoque < quantidade + vendidos) {
+        if (!produto || produto.estoque < quantidade) {
           throw new Error(
             "Estoque insuficiente para o produto: " + produto?.nome
           );
         }
+
+        await tx.produto.update({
+          where: {
+            uuid_produto: produto.uuid_produto
+          },
+          data: {
+            estoque: produto.estoque - quantidade
+          }
+        })
 
         precoTotal += produto.preco * quantidade;
 
