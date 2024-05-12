@@ -9,11 +9,17 @@ export async function findAllVendasByUserId(uuid_user: string) {
       uuid_user,
     },
     distinct: ['uuid_pagamento'],
+    orderBy: {
+      pagamento: {
+        data_criacao: 'desc'
+      }
+    },
     select: {
       pagamento: {
         select: {
           uuid_user: true,
           uuid_pagamento: true,
+          data_criacao: true,
           id_payment_mercado_pago: true,
           status_pagamento: true,
           valor_total: true,
