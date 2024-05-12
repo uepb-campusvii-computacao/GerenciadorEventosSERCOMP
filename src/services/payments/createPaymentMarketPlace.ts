@@ -84,7 +84,7 @@ export async function createPaymentMarketPlace({
           date_of_expiration,
           "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
         ),
-        notification_url: `${process.env.API_URL}/realizar-pagamento`,
+        notification_url: `${process.env.API_URL}/marketplace/${pagamento.uuid_pagamento}/realizar-pagamento`,
         payer: {
           email: email, // Correção: usar o email fornecido
         },
