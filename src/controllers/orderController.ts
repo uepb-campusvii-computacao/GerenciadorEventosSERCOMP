@@ -46,7 +46,12 @@ export async function realizarPagamentoVenda(req: Request, res: Response) {
     const { pagamento_id } = req.params;
     const { action } = req.body;
 
+    console.log(action);
+
+    console.log(pagamento_id)
+
     if (action === "payment.updated") {
+      console.log("estou na funcao")
       await changeVendaStatusPagamentoToREALIZADO(pagamento_id);
     }
 
