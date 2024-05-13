@@ -93,7 +93,6 @@ export async function findPagamentoById(uuid_pagamento: string){
   return response
 }
 
-
 export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: string){
 
   const current_date = new Date();
