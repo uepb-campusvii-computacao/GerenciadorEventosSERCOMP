@@ -266,6 +266,7 @@ export const projectionTableCredenciamento = async  (event_id: string) => {
         },
       },
       status_pagamento: true,
+      uuid_lote: true,
       credenciamento: true,
     },
     orderBy: {
@@ -280,6 +281,7 @@ export const projectionTableCredenciamento = async  (event_id: string) => {
     nome: userInscricao.usuario.nome,
     nome_cracha: userInscricao.usuario.nome_cracha,
     email: userInscricao.usuario.email,
+    uuid_lote: userInscricao.uuid_lote,
     status_pagamento: userInscricao.status_pagamento,
     credenciamento: userInscricao.credenciamento,
   }));
