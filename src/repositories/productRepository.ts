@@ -34,6 +34,27 @@ export async function updateProduct(
     return produto
 }
 
+
+export async function findUsersByProductId(uuid_produto: string){
+  const users = await prisma.venda.findMany({
+    where: {
+      uuid_produto
+    },
+    select: {
+      user: {
+        select: {
+          uuid_user: true,
+          nome: true,
+          email: true,
+        }
+      },
+    },
+    distinct: ["uuid_user"]
+  })
+
+  return users.map((item) => ({...item.user}))
+}
+
 export async function findProductById(uuid_produto: string){
     const produto = await prisma.produto.findUniqueOrThrow({
         where: {

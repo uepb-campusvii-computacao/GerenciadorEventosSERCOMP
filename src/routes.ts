@@ -36,6 +36,7 @@ import {
 } from "./controllers/orderController";
 import {
   getProductInMarket,
+  getUsersWithOrders,
   updateProductInMarket,
 } from "./controllers/marketController";
 
@@ -112,6 +113,7 @@ const marketRoutes = Router();
 marketRoutes.use(checkToken);
 marketRoutes.put("/admin/loja/produtos/:produto_id", updateProductInMarket);
 marketRoutes.get("/admin/loja/produtos/:produto_id", getProductInMarket);
+marketRoutes.get("/admin/loja/produtos/:produto_id/compradores", getUsersWithOrders);
 
 // Monta os sub-routers no Router principal
 routes.use("/", userRoutes);
