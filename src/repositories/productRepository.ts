@@ -34,7 +34,6 @@ export async function updateProduct(
     return produto
 }
 
-
 export async function findUsersByProductId(uuid_produto: string){
   const users = await prisma.venda.findMany({
     where: {

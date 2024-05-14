@@ -4,6 +4,7 @@ import { createPaymentMarketPlace } from "../services/payments/createPaymentMark
 import {
   changeVendaStatusPagamentoToREALIZADO,
   findAllVendasByUserId,
+  findOrderByUserIdAndProductId,
   findPagamentoById,
 } from "../repositories/orderRepository";
 import { getPayment } from "../services/payments/getPayment";
@@ -43,6 +44,27 @@ export async function getOrders(req: Request, res: Response) {
 
 
     return res.status(200).json(response);
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(400).send(error.message);
+    }
+    return res.status(400).send(error);
+  }
+}
+
+export async function getOrdersByUserAndProduct(req: Request, res: Response) {
+  try {
+    const { user_id, produto_id } = req.params;
+
+    const orders = await findOrderByUserIdAndProductId(user_id, produto_id);
+
+    return res.status(200).json(orders.map(item => ({
+      data_criacao: item.data_criacao,
+      data_pagamento: item.data_pagamento,
+      status_pagamento: item.vendas[0].pagamento.status_pagamento,
+      quantidade: item.vendas[0].quantidade,
+      valor_total: item.valor_total,
+    })));
   } catch (error) {
     if (error instanceof Error) {
       return res.status(400).send(error.message);
