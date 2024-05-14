@@ -96,3 +96,18 @@ export async function findAllEvents() {
 
   return response;
 }
+
+export async function countUsuariosCredenciadosByEvento(idEvento: string) {
+  const totalUsuariosCredenciados = await prisma.userInscricao.count({
+    where: {
+      credenciamento: true,
+      lote: {
+        evento: {
+          uuid_evento: idEvento
+        }
+      }
+    }
+  });
+  
+  return totalUsuariosCredenciados;
+}

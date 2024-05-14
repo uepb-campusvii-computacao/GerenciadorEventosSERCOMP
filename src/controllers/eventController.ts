@@ -2,11 +2,16 @@ import { TipoAtividade } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
 import { RegisterUserRequestParams } from "../interfaces/registerUserRequestParam";
+import { findActivitiesInEvent } from "../repositories/activityRepository";
 import {
+  countUsuariosCredenciadosByEvento,
   findAllActivitiesInEvent,
   findAllEvents,
   registerParticipante,
 } from "../repositories/eventRepository";
+import { getLotesAtivosByEventID } from "../repositories/loteRepository";
+import { getTotalValueVendasByEvento } from "../repositories/orderRepository";
+import { findAllProductsByEventId } from "../repositories/productRepository";
 import {
   changeCredenciamentoValue,
   findAllEventsByUserId,
@@ -15,9 +20,6 @@ import {
   projectionTableCredenciamento,
   updateParticipante,
 } from "../repositories/userInscricaoRepository";
-import { findActivitiesInEvent } from "../repositories/activityRepository";
-import { getLotesAtivosByEventID } from "../repositories/loteRepository";
-import { findAllProducts } from "../repositories/productRepository";
 
 export async function registerParticipanteInEvent(req: Request, res: Response) {
   try {
@@ -133,7 +135,7 @@ export async function getAllProductsInEvent(req: Request, res: Response){
   try {
     const { event_id } = req.params;
 
-    const response = await findAllProducts(event_id);
+    const response = await findAllProductsByEventId(event_id);
 
     return res.status(200).json(response);
   } catch (error) {
@@ -233,10 +235,13 @@ export async function getFinancialInformation(req: Request, res: Response) {
   try {
     const { event_id } = req.params;
 
-    const userInscriptions = await findUserInscriptionStatus(event_id);
+    const [userInscriptions, totalArrecadadoVendas, credenciados] = await Promise.all([
+      findUserInscriptionStatus(event_id),
+      getTotalValueVendasByEvento(event_id),
+      countUsuariosCredenciadosByEvento(event_id)
+    ]); 
 
-    const usersRegistered = userInscriptions.length;
-    
+    const usersRegistered = userInscriptions.length;    
     const usersWithPaymentStatusPending = userInscriptions.filter(
       (inscricao) => inscricao.status_pagamento === "PENDENTE"
     ).length;
@@ -249,14 +254,14 @@ export async function getFinancialInformation(req: Request, res: Response) {
       (inscricao) => inscricao.status_pagamento === "REALIZADO"
     );
 
-    let totalArrecadado = 0;
-    usersWithPaymentStatusRealizado.forEach((inscricao) => {
-      totalArrecadado += inscricao.lote.preco;
-    });
+    const totalArrecadadoInscricoes = usersWithPaymentStatusRealizado.reduce(
+      (total, curr) => total + curr.lote.preco, 
+    0)   
 
     return res.status(200).json({
       total_inscritos: usersRegistered,
-      total_arrecadado: totalArrecadado,
+      total_credenciados: credenciados,
+      total_arrecadado: {totalArrecadadoInscricoes, totalArrecadadoVendas},
       inscricoes_pendentes: usersWithPaymentStatusPending,
       inscricoes_gratuitas: usersWithPaymentStatusGratuito
     });
