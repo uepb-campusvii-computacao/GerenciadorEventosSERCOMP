@@ -11,7 +11,7 @@ export async function findAllVendasByUserId(uuid_user: string) {
     distinct: ['uuid_pagamento'],
     orderBy: {
       pagamento: {
-        data_criacao: 'desc'
+        data_criacao: "desc"
       }
     },
     select: {
