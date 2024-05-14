@@ -19,6 +19,16 @@ import {
   updateParticipantInformations,
 } from "./controllers/eventController";
 import {
+  getProductInMarket,
+  getUsersWithOrders,
+  updateProductInMarket,
+} from "./controllers/marketController";
+import {
+  createOrder,
+  getOrders,
+  realizarPagamentoVenda,
+} from "./controllers/orderController";
+import {
   deleteUser,
   getLoteIdAndUserId,
   getUserInEvent,
@@ -29,16 +39,6 @@ import {
   updatePaymentStatus,
 } from "./controllers/userController";
 import { checkToken } from "./lib/ensureAuthenticate";
-import {
-  createOrder,
-  getOrders,
-  realizarPagamentoVenda,
-} from "./controllers/orderController";
-import {
-  getProductInMarket,
-  getUsersWithOrders,
-  updateProductInMarket,
-} from "./controllers/marketController";
 
 const routes = Router();
 
@@ -108,7 +108,7 @@ activityRoutes.put(
   upadateUserActivity
 );
 
-// Rotas para o mercadp (com autenticação)
+// Rotas para o mercado (com autenticação)
 const marketRoutes = Router();
 marketRoutes.use(checkToken);
 marketRoutes.put("/admin/loja/produtos/:produto_id", updateProductInMarket);
