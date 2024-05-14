@@ -1,7 +1,4 @@
-import { CreateOrderParams } from "../interfaces/createOrderParams";
 import { prisma } from "../lib/prisma";
-import { createPaymentMarketPlace } from "../services/payments/createPaymentMarketPlace";
-import { getPayment } from "../services/payments/getPayment";
 
 export async function findAllVendasByUserId(uuid_user: string) {
   const response = prisma.venda.findMany({
@@ -91,6 +88,32 @@ export async function findPagamentoById(uuid_pagamento: string){
   }
 
   return response
+}
+
+export async function getTotalValueVendasByEvento(idEvento: string) {
+  const vendas = await prisma.venda.findMany({
+    where: {
+      produto: {
+        evento: {
+          uuid_evento: idEvento
+        }
+      },
+      pagamento: {
+        status_pagamento: 'REALIZADO'
+      }
+    },
+    select: {
+      pagamento: {
+        select: {
+          valor_total: true
+        }
+      }
+    }
+  });
+  
+  const valorTotalVendas = vendas.reduce((acc, venda) => acc + venda.pagamento.valor_total, 0);
+
+  return valorTotalVendas;
 }
 
 export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: string){
