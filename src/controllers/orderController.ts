@@ -1,13 +1,13 @@
+import { StatusPagamento } from "@prisma/client";
 import { Request, Response } from "express";
 import { CreateOrderParams } from "../interfaces/createOrderParams";
-import { createPaymentMarketPlace } from "../services/payments/createPaymentMarketPlace";
 import {
-  changeVendaStatusPagamentoToREALIZADO,
+  changeVendaStatusPagamento,
   findAllVendasByUserId,
-  findOrderByUserIdAndProductId,
-  findPagamentoById,
+  findOrderByUserIdAndProductId
 } from "../repositories/orderRepository";
-import { getPayment } from "../services/payments/getPayment";
+import { createPaymentMarketPlace } from "../services/payments/createPaymentMarketPlace";
+import { getPayment, getPaymentStatusForVenda } from "../services/payments/getPayment";
 
 export async function createOrder(req: Request, res: Response) {
   try {
@@ -79,7 +79,13 @@ export async function realizarPagamentoVenda(req: Request, res: Response) {
     const { action } = req.body;
 
     if (action === "payment.updated") {
-      await changeVendaStatusPagamentoToREALIZADO(pagamento_id);
+      const status = await getPaymentStatusForVenda(pagamento_id);
+
+      if(status === StatusPagamento.REALIZADO){
+        await changeVendaStatusPagamento(pagamento_id, StatusPagamento.REALIZADO);
+      }else if(status === StatusPagamento.EXPIRADO){
+        await changeVendaStatusPagamento(pagamento_id, StatusPagamento.EXPIRADO);
+      }
     }
 
     return res.status(200).send("Valor alterado");

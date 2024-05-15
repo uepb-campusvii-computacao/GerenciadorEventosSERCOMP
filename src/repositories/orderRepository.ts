@@ -1,3 +1,4 @@
+import { StatusPagamento } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 
 export async function findAllVendasByUserId(uuid_user: string) {
@@ -44,6 +45,22 @@ export async function findAllVendasByUserId(uuid_user: string) {
   });
 
   return response;
+}
+
+export async function findStatusPagamentoById(pagamentoId: string) {
+  try {
+    const pagamento = await prisma.pagamento.findUnique({
+      where: {
+        uuid_pagamento: pagamentoId
+      },
+      select: {
+        id_payment_mercado_pago: true
+      }
+    });
+    return pagamento;
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function findPagamentoById(uuid_pagamento: string){
@@ -116,23 +133,18 @@ export async function getTotalValueVendasByEvento(idEvento: string) {
   return valorTotalVendas;
 }
 
-export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: string){
-
+export async function changeVendaStatusPagamento(uuid_pagamento: string, status_pagamento: StatusPagamento) {
   const current_date = new Date();
 
-
-  const pagamento = await prisma.pagamento.update({
+  await prisma.pagamento.update({
     where: {
       uuid_pagamento,
     },
     data: {
       data_pagamento: current_date,
-      status_pagamento: "REALIZADO"
+      status_pagamento
     }
   });
-
-  return pagamento;
-
 }
 
 export async function findOrderByUserIdAndProductId(uuid_user: string, uuid_produto: string){
