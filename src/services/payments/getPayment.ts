@@ -1,4 +1,13 @@
+import { StatusPagamento } from "@prisma/client";
 import { payment } from "../../lib/mercado_pago";
+import { findStatusPagamentoById } from "../../repositories/orderRepository";
+import { findUserInscricaoByUserAndLote } from "../../repositories/userInscricaoRepository";
+
+const statusPagamentoHash: { [key: string]: StatusPagamento } = {
+  'pending': StatusPagamento.PENDENTE,
+  'approved': StatusPagamento.REALIZADO,
+  'cancelled': StatusPagamento.EXPIRADO
+};
 
 export async function getPayment(payment_id: string) {
   
@@ -15,4 +24,52 @@ export async function getPayment(payment_id: string) {
   }
 
   return transaction_data;
+}
+
+export async function getPaymentStatusForInscricao(user_id: string, lote_id: string): Promise<StatusPagamento | undefined> {
+  try {
+    const user = await findUserInscricaoByUserAndLote(user_id, lote_id);
+
+    if (!user) {
+      throw new Error("Inscrição não encontrada!");
+    }
+
+    if (!user.id_payment_mercado_pago) {
+      throw new Error("Pagamento não encontrado!");
+    }
+
+    const { status } = await payment.get({ id: user.id_payment_mercado_pago });
+
+    if (!status) {
+      throw new Error("Status de pagamento não encontrado!");
+    }
+
+    return status in statusPagamentoHash ? statusPagamentoHash[status] : undefined;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getPaymentStatusForVenda(pagamento_id : string): Promise<StatusPagamento | undefined> {
+  try {
+    const pagamento = await findStatusPagamentoById(pagamento_id);
+
+    if (!pagamento) {
+      throw new Error("Inscrição não encontrada!");
+    }
+
+    if (!pagamento.id_payment_mercado_pago) {
+      throw new Error("Pagamento não encontrado!");
+    }
+
+    const { status } = await payment.get({ id: pagamento.id_payment_mercado_pago });
+
+    if (!status) {
+      throw new Error("Status de pagamento não encontrado!");
+    }
+
+    return status in statusPagamentoHash ? statusPagamentoHash[status] : undefined;
+  } catch (error) {
+    throw error;
+  }
 }
