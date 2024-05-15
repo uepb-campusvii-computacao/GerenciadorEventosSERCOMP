@@ -11,6 +11,7 @@ import {
   getAllActivitiesInEvent,
   getAllActivitiesInEventOrdenateByTipo,
   getAllEventsByIdUser,
+  getAllFinancialInformationsInEvent,
   getAllProductsInEvent,
   getAllSubscribersInEvent,
   getFinancialInformation,
@@ -67,6 +68,11 @@ routes.get(
   getAllActivitiesInEventOrdenateByTipo
 );
 routes.get("/pagamento/user/:user_id/lote/:lote_id", getUserInscricao);
+
+routes.get(
+  "/admin/events/:id_evento/inscricoes/todos",
+  getAllFinancialInformationsInEvent
+);
 
 // Rotas para usuários (com autenticação)
 const userRoutes = Router();
