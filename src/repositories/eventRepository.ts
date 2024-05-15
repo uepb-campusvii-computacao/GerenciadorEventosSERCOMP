@@ -111,3 +111,16 @@ export async function countUsuariosCredenciadosByEvento(idEvento: string) {
   
   return totalUsuariosCredenciados;
 }
+
+async function findPagamentoByUserID(user_id : string) {
+  try {
+    const pagamentos = await prisma.pagamento.findMany({
+      where: {
+        uuid_user: user_id,
+      },
+    });
+    return pagamentos;
+  } catch (error) {
+    throw error;
+  }
+}

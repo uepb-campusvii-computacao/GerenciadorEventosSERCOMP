@@ -1,20 +1,20 @@
+import { StatusPagamento } from "@prisma/client";
 import { Request, Response } from "express";
 import jsonwebtoken from "jsonwebtoken";
+import { FindLoteIdAnduserIdParams } from "../interfaces/findLoteIdAnduserIdParams";
 import { UpdatePaymentStatusParams } from "../interfaces/updatePaymentStatusParams";
 import { UserLoginParams } from "../interfaces/userLoginParams";
 import { findLoteById } from "../repositories/loteRepository";
 import { findActivitiesByUserId } from "../repositories/userAtividadeRepository";
 import {
   changeStatusPagamento,
-  changeStatusPagamentoToREALIZADO,
   findLoteIdAndUserIdByEmail,
   findUserInscricaoByEventId,
-  findUserInscricaoById,
+  findUserInscricaoById
 } from "../repositories/userInscricaoRepository";
 import { findUserByEmail, findUserById } from "../repositories/userRepository";
-import { getPayment } from "../services/payments/getPayment";
+import { getPayment, getPaymentStatusForInscricao } from "../services/payments/getPayment";
 import { checkPassword } from "../services/user/checkPassword";
-import { FindLoteIdAnduserIdParams } from "../interfaces/findLoteIdAnduserIdParams";
 import { deleteUserByUserId } from "../services/user/deleteUserByUserId";
 
 export async function loginUser(req: Request, res: Response) {
@@ -72,12 +72,18 @@ export async function realizarPagamento(req: Request, res: Response) {
     const { action } = req.body;
 
     if (action === "payment.updated") {
-      await changeStatusPagamentoToREALIZADO(lote_id, user_id);
+      const status = await getPaymentStatusForInscricao(user_id, lote_id);
+
+      if(status === StatusPagamento.REALIZADO){
+        await changeStatusPagamento(user_id, lote_id, StatusPagamento.REALIZADO);
+      }else if(status === StatusPagamento.EXPIRADO){
+        await changeStatusPagamento(user_id, lote_id, StatusPagamento.EXPIRADO);
+      }
     }
 
     return res.status(200).send("Valor alterado");
   } catch (error) {
-    return res.status(400).send("informações inválidas");
+    return res.status(400).send("Informações inválidas");
   }
 }
 
