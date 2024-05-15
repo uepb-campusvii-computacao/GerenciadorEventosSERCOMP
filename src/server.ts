@@ -4,13 +4,14 @@ import * as dotenv from 'dotenv';
 import routes from "./routes";
 import swaggerUi from "swagger-ui-express";
 import SwaggerDocs from "../src/swagger.json";
+import { checkToken } from "./lib/ensureAuthenticate";
 dotenv.config();
 
 const app = express();
 
 app.use(express.json());
 
-app.use("/doc-api", swaggerUi.serve, swaggerUi.setup(SwaggerDocs))
+app.use("/doc-api",checkToken, swaggerUi.serve, swaggerUi.setup(SwaggerDocs))
 
 const FRONTEND_URL = process.env.FRONTEND_URL || ""
 const GERENCIADOR_URL = process.env.GERENCIADOR_URL || ""
