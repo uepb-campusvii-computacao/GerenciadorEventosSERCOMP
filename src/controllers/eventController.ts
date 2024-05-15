@@ -15,11 +15,13 @@ import { findAllProductsByEventId } from "../repositories/productRepository";
 import {
   changeCredenciamentoValue,
   findAllEventsByUserId,
+  findAllSubscribersInEvent,
   findUserInscricaoByEventId,
   findUserInscriptionStatus,
   projectionTableCredenciamento,
   updateParticipante,
 } from "../repositories/userInscricaoRepository";
+import { getPayment } from "../services/payments/getPayment";
 
 export async function registerParticipanteInEvent(req: Request, res: Response) {
   try {
@@ -117,7 +119,7 @@ export async function updateParticipantInformations(
       if (error.code === "P2002") {
         errorMessage = "Este e-mail já está em uso.";
       }
-    }else if(error instanceof Error){
+    } else if (error instanceof Error) {
       errorMessage = error.message;
     }
 
@@ -131,7 +133,7 @@ export async function getAllEvents(req: Request, res: Response) {
   res.send(all_events);
 }
 
-export async function getAllProductsInEvent(req: Request, res: Response){
+export async function getAllProductsInEvent(req: Request, res: Response) {
   try {
     const { event_id } = req.params;
 
@@ -139,7 +141,7 @@ export async function getAllProductsInEvent(req: Request, res: Response){
 
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).send(error)
+    return res.status(400).send(error);
   }
 }
 
@@ -171,6 +173,49 @@ export async function getAllSubscribersInEvent(req: Request, res: Response) {
     return res.status(400).send(error);
   }
 }
+
+export async function getAllFinancialInformationsInEvent(
+  req: Request,
+  res: Response
+) {
+  try {
+    const { id_evento } = req.params;
+
+    const all_subscribers = await findAllSubscribersInEvent(id_evento);
+
+    if (!all_subscribers) {
+      return res.status(400).send("Evento não encontrado");
+    }
+
+    const response = await Promise.all(all_subscribers.map(async (item) => {
+      let transaction_data = null;
+      if (item.id_payment_mercado_pago) {
+        try {
+          transaction_data = await getPayment(item.id_payment_mercado_pago);
+        } catch (error) {
+          console.error("Erro ao obter dados do pagamento:", error);
+        }
+      }
+
+      return {
+        uuid_user: item.uuid_user,
+        nome: item.usuario.nome,
+        email: item.usuario.email,
+        mercado_pago_id: item.id_payment_mercado_pago,
+        status_pagamento: item.status_pagamento,
+        status: transaction_data ? transaction_data.status : "",
+        date_created: transaction_data ? transaction_data.date_created : "",
+        data_approved: transaction_data ? transaction_data.date_approved : "",
+      };
+    }));
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("Erro na solicitação:", error);
+    return res.status(500).send("Ocorreu um erro ao processar a solicitação.");
+  }
+}
+
 
 export async function changeEventCredenciamentoValue(
   req: Request,
@@ -235,13 +280,14 @@ export async function getFinancialInformation(req: Request, res: Response) {
   try {
     const { event_id } = req.params;
 
-    const [userInscriptions, totalArrecadadoVendas, credenciados] = await Promise.all([
-      findUserInscriptionStatus(event_id),
-      getTotalValueVendasByEvento(event_id),
-      countUsuariosCredenciadosByEvento(event_id)
-    ]); 
+    const [userInscriptions, totalArrecadadoVendas, credenciados] =
+      await Promise.all([
+        findUserInscriptionStatus(event_id),
+        getTotalValueVendasByEvento(event_id),
+        countUsuariosCredenciadosByEvento(event_id),
+      ]);
 
-    const usersRegistered = userInscriptions.length;    
+    const usersRegistered = userInscriptions.length;
     const usersWithPaymentStatusPending = userInscriptions.filter(
       (inscricao) => inscricao.status_pagamento === "PENDENTE"
     ).length;
@@ -255,15 +301,16 @@ export async function getFinancialInformation(req: Request, res: Response) {
     );
 
     const totalArrecadadoInscricoes = usersWithPaymentStatusRealizado.reduce(
-      (total, curr) => total + curr.lote.preco, 
-    0)   
+      (total, curr) => total + curr.lote.preco,
+      0
+    );
 
     return res.status(200).json({
       total_inscritos: usersRegistered,
       total_credenciados: credenciados,
-      total_arrecadado: {totalArrecadadoInscricoes, totalArrecadadoVendas},
+      total_arrecadado: { totalArrecadadoInscricoes, totalArrecadadoVendas },
       inscricoes_pendentes: usersWithPaymentStatusPending,
-      inscricoes_gratuitas: usersWithPaymentStatusGratuito
+      inscricoes_gratuitas: usersWithPaymentStatusGratuito,
     });
   } catch (error) {
     console.error("Erro ao obter informações financeiras:", error);

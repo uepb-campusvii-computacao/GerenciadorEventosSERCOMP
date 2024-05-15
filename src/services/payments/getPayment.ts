@@ -9,6 +9,9 @@ export async function getPayment(payment_id: string) {
   }
 
   const transaction_data = {
+    date_created: payment_data.date_created,
+    date_approved: payment_data.date_approved,
+    status: payment_data.status,
     qr_code_base64: "data:image/png;base64,"+payment_data.point_of_interaction?.transaction_data?.qr_code_base64,
     qr_code: payment_data.point_of_interaction?.transaction_data?.qr_code,
     ticket_url: payment_data.point_of_interaction?.transaction_data?.ticket_url

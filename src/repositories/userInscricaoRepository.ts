@@ -149,6 +149,8 @@ export async function findAllSubscribersInEvent(event_id: string) {
     select: {
       uuid_user: true,
       credenciamento: true,
+      id_payment_mercado_pago: true,
+      status_pagamento: true,
       usuario: {
         select: {
           nome: true,
