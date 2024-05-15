@@ -135,3 +135,36 @@ export async function changeVendaStatusPagamentoToREALIZADO(uuid_pagamento: stri
 
 }
 
+export async function findOrderByUserIdAndProductId(uuid_user: string, uuid_produto: string){
+  const orders = await prisma.pagamento.findMany({
+    where: {
+      uuid_user,
+      AND: {
+        vendas: {
+          some: {
+            uuid_produto
+          }
+        }
+      }
+    },
+    select: {
+      data_criacao: true,
+      data_pagamento: true,
+      vendas: {
+        select: {
+          quantidade: true,
+          pagamento: {
+            select: {
+              status_pagamento: true
+            }
+          }
+        },
+        take: 1,
+      },
+      valor_total: true,
+    }
+  });
+
+  return orders;
+}
+
