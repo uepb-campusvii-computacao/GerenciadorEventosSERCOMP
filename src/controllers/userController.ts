@@ -74,11 +74,13 @@ export async function realizarPagamento(req: Request, res: Response) {
     if (action === "payment.updated") {
       const status = await getPaymentStatusForInscricao(user_id, lote_id);
 
+      console.log(status)
       if(status === StatusPagamento.REALIZADO){
         await changeStatusPagamento(user_id, lote_id, StatusPagamento.REALIZADO);
       }else if(status === StatusPagamento.EXPIRADO){
         await changeStatusPagamento(user_id, lote_id, StatusPagamento.EXPIRADO);
       }
+      console.log("alterado");
     }
 
     return res.status(200).send("Valor alterado");
