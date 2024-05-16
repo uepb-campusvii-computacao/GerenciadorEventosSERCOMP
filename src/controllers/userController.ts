@@ -82,7 +82,7 @@ export async function realizarPagamento(req: Request, res: Response) {
         throw new Error("Erro no pagamento")
       }
 
-      await changeStatusPagamento(user_id, lote_id, status);
+      await changeStatusPagamento(lote_id, user_id, status);
       console.log("fim");
 
       console.log("alterado");
