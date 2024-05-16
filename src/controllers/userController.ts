@@ -79,6 +79,7 @@ export async function realizarPagamento(req: Request, res: Response) {
       }else if(status === StatusPagamento.EXPIRADO){
         await changeStatusPagamento(user_id, lote_id, StatusPagamento.EXPIRADO);
       }
+      
     }
 
     return res.status(200).send("Valor alterado");

@@ -110,8 +110,8 @@ export async function findUserInscricaoByUserAndLote(userId : string, loteId : s
 }
 
 export async function changeStatusPagamento(
-  uuid_lote: string,
   uuid_user: string,
+  uuid_lote: string,
   status_pagamento: StatusPagamento
 ) {
   await prisma.userInscricao.update({
