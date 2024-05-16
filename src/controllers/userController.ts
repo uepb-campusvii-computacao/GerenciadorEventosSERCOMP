@@ -76,10 +76,13 @@ export async function realizarPagamento(req: Request, res: Response) {
 
       console.log(status)
       if(status === StatusPagamento.REALIZADO){
+        console.log("inicio");
         await changeStatusPagamento(user_id, lote_id, StatusPagamento.REALIZADO);
+        console.log("fim");
       }else if(status === StatusPagamento.EXPIRADO){
         await changeStatusPagamento(user_id, lote_id, StatusPagamento.EXPIRADO);
       }
+
       console.log("alterado");
     }
 
