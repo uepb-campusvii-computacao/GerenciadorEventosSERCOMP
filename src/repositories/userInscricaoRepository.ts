@@ -126,7 +126,7 @@ export async function changeStatusPagamento(
     },
   });
 
-  console.log(inscricao)
+  console.log(inscricao.status_pagamento)
 }
 
 export async function changeStatusPagamentoToREALIZADO(uuid_lote: string, uuid_user: string){

@@ -10,10 +10,13 @@ import {
   changeStatusPagamento,
   findLoteIdAndUserIdByEmail,
   findUserInscricaoByEventId,
-  findUserInscricaoById
+  findUserInscricaoById,
 } from "../repositories/userInscricaoRepository";
 import { findUserByEmail, findUserById } from "../repositories/userRepository";
-import { getPayment, getPaymentStatusForInscricao } from "../services/payments/getPayment";
+import {
+  getPayment,
+  getPaymentStatusForInscricao,
+} from "../services/payments/getPayment";
 import { checkPassword } from "../services/user/checkPassword";
 import { deleteUserByUserId } from "../services/user/deleteUserByUserId";
 
@@ -72,16 +75,15 @@ export async function realizarPagamento(req: Request, res: Response) {
     const { action } = req.body;
 
     if (action === "payment.updated") {
+      console.log("inicio");
       const status = await getPaymentStatusForInscricao(user_id, lote_id);
 
-      console.log(status)
-      if(status === StatusPagamento.REALIZADO){
-        console.log("inicio");
-        await changeStatusPagamento(user_id, lote_id, StatusPagamento.REALIZADO);
-        console.log("fim");
-      }else if(status === StatusPagamento.EXPIRADO){
-        await changeStatusPagamento(user_id, lote_id, StatusPagamento.EXPIRADO);
+      if(!status){
+        throw new Error("Erro no pagamento")
       }
+
+      await changeStatusPagamento(user_id, lote_id, status);
+      console.log("fim");
 
       console.log("alterado");
     }
@@ -124,7 +126,7 @@ export async function getUserInscricao(req: Request, res: Response) {
   try {
     const { user_id, lote_id } = req.params;
 
-    const user_inscricao = await findUserInscricaoById(user_id, lote_id)
+    const user_inscricao = await findUserInscricaoById(user_id, lote_id);
 
     const payment = await getPayment(user_inscricao!.id_payment_mercado_pago);
 
