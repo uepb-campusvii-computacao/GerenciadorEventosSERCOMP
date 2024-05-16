@@ -114,19 +114,21 @@ export async function changeStatusPagamento(
   uuid_user: string,
   status_pagamento: StatusPagamento
 ) {
-  const inscricao = await prisma.userInscricao.update({
-    where: {
-      uuid_lote_uuid_user: {
-        uuid_user,
-        uuid_lote
+  try{
+    await prisma.userInscricao.update({
+      where: {
+        uuid_lote_uuid_user: {
+          uuid_user,
+          uuid_lote
+        },
       },
-    },
-    data: {
-      status_pagamento,
-    },
-  });
-
-  console.log(inscricao.status_pagamento)
+      data: {
+        status_pagamento,
+      },
+    });
+  }catch(err){
+    console.log(err);
+  }
 }
 
 export async function changeStatusPagamentoToREALIZADO(uuid_lote: string, uuid_user: string){
