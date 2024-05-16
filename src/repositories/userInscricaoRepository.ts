@@ -115,6 +115,19 @@ export async function changeStatusPagamento(
   status_pagamento: StatusPagamento
 ) {
   try{
+    const user_inscricao = await prisma.userInscricao.findUnique({
+      where: {
+        uuid_lote_uuid_user: {
+          uuid_user,
+          uuid_lote
+        }
+      }
+    })
+
+    console.log(uuid_lote, uuid_user, status_pagamento)
+
+    console.log(user_inscricao);
+
     await prisma.userInscricao.update({
       where: {
         uuid_lote_uuid_user: {
