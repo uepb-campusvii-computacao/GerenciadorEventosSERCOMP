@@ -110,38 +110,21 @@ export async function findUserInscricaoByUserAndLote(userId : string, loteId : s
 }
 
 export async function changeStatusPagamento(
-  uuid_lote: string,
   uuid_user: string,
+  uuid_lote: string,
   status_pagamento: StatusPagamento
 ) {
-  try{
-    const user_inscricao = await prisma.userInscricao.findUnique({
-      where: {
-        uuid_lote_uuid_user: {
-          uuid_user: uuid_user,
-          uuid_lote: uuid_lote,
-        }
-      }
-    })
-
-    console.log(uuid_lote, uuid_user, status_pagamento)
-
-    console.log(user_inscricao);
-
-    await prisma.userInscricao.update({
-      where: {
-        uuid_lote_uuid_user: {
-          uuid_user,
-          uuid_lote
-        },
+  await prisma.userInscricao.update({
+    where: {
+      uuid_lote_uuid_user: {
+        uuid_user,
+        uuid_lote
       },
-      data: {
-        status_pagamento,
-      },
-    });
-  }catch(err){
-    console.log(err);
-  }
+    },
+    data: {
+      status_pagamento,
+    },
+  });
 }
 
 export async function changeStatusPagamentoToREALIZADO(uuid_lote: string, uuid_user: string){
