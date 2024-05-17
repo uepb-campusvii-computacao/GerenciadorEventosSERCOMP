@@ -8,6 +8,7 @@ import {
 } from "../repositories/orderRepository";
 import { createPaymentMarketPlace } from "../services/payments/createPaymentMarketPlace";
 import { getPayment, getPaymentStatusForVenda } from "../services/payments/getPayment";
+import { findUserInscricaoById, findUserInscricaoByMercadoPagoId } from "../repositories/userInscricaoRepository";
 
 export async function createOrder(req: Request, res: Response) {
   try {
@@ -79,17 +80,18 @@ export async function realizarPagamentoVenda(req: Request, res: Response) {
     const { action } = req.body;
 
     if (action === "payment.updated") {
-      const status = await getPaymentStatusForVenda(pagamento_id);
+      const [status, user_inscricao] = await Promise.all([
+        getPaymentStatusForVenda(pagamento_id),
+        findUserInscricaoByMercadoPagoId(pagamento_id)
+      ]);
 
-      if(status === StatusPagamento.REALIZADO){
-        await changeVendaStatusPagamento(pagamento_id, StatusPagamento.REALIZADO);
-      }else if(status === StatusPagamento.EXPIRADO){
-        await changeVendaStatusPagamento(pagamento_id, StatusPagamento.EXPIRADO);
+      if (status && user_inscricao.status_pagamento !== StatusPagamento.GRATUITO) {
+        await changeVendaStatusPagamento(pagamento_id, status);
       }
     }
 
     return res.status(200).send("Valor alterado");
   } catch (error) {
-    return res.status(400).send("informações inválidas");
+    return res.status(400).send("Informações inválidas");
   }
 }
