@@ -14,7 +14,7 @@
             "post": {
                 "summary": "Fazer login do usuário",
                 "description": "Esta rota será responsável pelo login do usuário",
-                "tags": ["UserRoutes"],
+                "tags": ["Rotas públicas"],
                 "requestBody": {
                     "content":{
                         "application/json": {
@@ -69,8 +69,7 @@
                 "get": {
                     "description":"Buscar Lote do evento",
                     "summary": "Buscar Lote do evento",
-                    "tags":["UserRoutes"],
-                    "security": [{ "bearerAuth": [] }],
+                    "tags":["Rotas públicas"],
                     "parameters":[
                         {
                             "name": "event_id",
@@ -115,8 +114,7 @@
                 "post":{
                     "summary": "Registrar usuário",
                     "description": "Esta rota será responsável por registrar usuários",
-                    "tags": ["UserRoutes"],
-                    "security": [{ "bearerAuth": [] }],
+                    "tags": ["Rotas públicas"],
                     "requestBody": {
                         "content":{
                             "application/json": {
@@ -194,12 +192,65 @@
             }
             }
         },
+        "/events/:event_id/inscricoes/find":{
+            "post":{
+                "summary":"Pegar Id do lote e Usuário",
+                "description":"Pegar Id do lote e Usuário",
+                "tags": ["Rotas públicas"],
+                "parameters":[{
+                    "name":"event_id",
+                    "in":"params",
+                    "description":"Id do evento",
+                    "required":true
+                }
+              
+               
+            ],
+            "requestBody": {
+                "content":{
+                    "application/json": {
+                        "schema":{
+                            "$ref": "#/components/schemas/email"
+
+                        }
+                       
+                    }
+                }
+            },
+            "responses":{
+                "200":{
+                "description":"OK",
+                "content":{
+                    "application/json":{
+                        "schema":{
+                            "type":"array",
+                            "items":{
+                            "$ref": "#/components/schemas/GetLoteandUserID"
+                            }
+                        },
+                        "example":{
+                            "uuid_user": "any",
+                            "uuid_lote": "any"
+                            
+                            
+                        }
+                    }
+                }
+
+                },
+                "400":{
+                    "description":"Informações inválidas"
+                }
+             
+            }
+
+            }
+        },
         "/lote/:lote_id/inscricoes/user/:user_id/":{
             "get":{
                 "description":"Buscar Lote do evento",
                     "summary": "Buscar Lote do evento",
-                    "tags":["UserRoutes"],
-                    "security": [{ "bearerAuth": [] }],
+                    "tags":["Rotas públicas"],
                     "parameters":[
                         {
                             "name": "event_id",
@@ -252,12 +303,11 @@
 
             }
         },
-        "/lote/:lote_id/user/:user_id/realizar-pagemento":{
+        "/lote/:lote_id/user/:user_id/realizar-pagamento":{
             "post":{
                 "summary":"Realizar Pagamento",
                 "description":"EndPoint de realizar pagamento",
-                "tags": ["UserRoutes"],
-                "security": [{ "bearerAuth": [] }],
+                "tags": ["Rotas públicas"],
                 "parameters":[{
                     "name":"lote_id",
                     "in":"path",
@@ -297,8 +347,7 @@
              "get":{
                 "description":"Buscar todas as atividades",
                     "summary": "Buscar as atividades do evento",
-                    "tags":["UserRoutes"],
-                    "security": [{ "bearerAuth": [] }],
+                    "tags":["Rotas públicas"],
                     "parameters":[
                         {
                             "name": "id_evento",
@@ -348,8 +397,7 @@
             "get":{
                 "description":"Buscar Inscrição do Usuário",
                     "summary": "Buscar informações da inscrição do usuário",
-                    "tags":["UserRoutes"],
-                    "security": [{ "bearerAuth": [] }],
+                    "tags":["Rotas públicas"],
                     "parameters":[
                         {
                             "name": "user_id",
@@ -397,12 +445,258 @@
 
             }
         },
+        "/admin/events/:id_evento/inscricoes/todos":{
+            "get":{
+                "description":"Buscar Informações financeiras",
+                "summary": "Buscar Informações financeiras",
+                "tags":["Rotas públicas"],
+                "parameters":[
+                    {
+                        "name": "id_evento",
+                        "in":"params",
+                        "description": "id do evento",
+                        "required":true
+                        
+                    }
+                ],
+                "responses":{
+                    "200":{
+                    "description":"OK",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"array",
+                                "items":{
+                                "$ref": "#/components/schemas/GetFinancialInfo"
+                                }
+                            },
+                            "example":{
+                                
+                                "uuid_user": "string",
+                                "nome":"string",
+                                "email": "example@gmail.com",
+                                "mercado_pago_id": "string",
+                                "status_pagamento": "PENDENTE",
+                                "status": "string",
+                                "date_created": "string",
+                                "data_approved": "string"
+                                
+                            }
+                        }
+                    }
 
+                    },
+                    "400":{
+                        "description":"Evento não encontrado"
+                    },
+                    "500":{
+                        "description":"Ocorreu um erro ao processar a solicitação."
+                    }
+                 
+                }
+            }
+        },
+        "/marketplace":{
+            "post":{
+                "summary":"Criar pedido",
+                "description":"Criar pedido",
+                "tags": ["Rotas Públicas Mercado"],
+              "requestBody": {
+                "content":{
+                    "application/json": {
+                        "schema":{
+                            "$ref": "#/components/schemas/createorder_market"
+
+                        }
+                       
+                    }
+                }
+            },
+            "responses":{
+                "200":{
+                    "description":"OK",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"array",
+                                "items":{
+                                "$ref": "#/components/schemas/response_market"
+                                }
+                            },
+                            "example":{
+                                
+                                "uuid_pagamento": "string",
+                                "uuid_user": "string",
+                                "id_payment_mercado_pago": "string",
+                                "valor_total": "number",
+                                "status_pagamento": "$Enums.StatusPagamento",
+                                "data_pagamento": "Date | null",
+                                "data_criacao": "Date"
+                                
+                            }
+                        }
+                    }
+
+                    },
+                "400":{
+                    "description": "Informações inválidas!"
+                }
+            }
+            }
+        },
+        "/marketplace/user/:user_id":{
+            "get":{
+                "description":"Buscar pedidos",
+                "summary": "Buscar pedidos",
+                "tags":["Rotas Públicas Mercado"],
+                "parameters":[
+                    {
+                        "name": "id_evento",
+                        "in":"params",
+                        "description": "id do evento",
+                        "required":true
+                        
+                    }
+                ],
+                "responses":{
+                    "200":{
+                    "description":"OK",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"array",
+                                "items":{
+                                "$ref": "#/components/schemas/pagamento_market"
+                                }
+                            },
+                            "example":{
+                                
+                                "pagamento": {
+                                    "usuario": {
+                                        "nome": "string"
+                                    },
+                                    "uuid_pagamento": "string",
+                                    "uuid_user": "string",
+                                    "id_payment_mercado_pago": "string",
+                                    "valor_total": "number",
+                                    "status_pagamento": "$Enums.StatusPagamento",
+                                    "data_criacao": "Date",
+                                "vendas": {
+                                    
+                                        "quantidade": "true",
+                                        "produto": {
+                                            "select": {
+                                                "uuid_produto": "true",
+                                               "nome": "true",
+                                                "preco": "true",
+                                                "imagem_url": "true"
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                            }
+                        }
+                    }
+
+                    },
+                    "400":{
+                        "description":"Informações invalidas!"
+                    }
+                 
+                 
+                }
+            }
+
+        },
+        "/marketplace/:pagamento_id/realizar-pagamento":{
+            "post":{
+                "summary":"Realizar Pagamento",
+                "description":"EndPoint de realizar pagamento",
+                "tags": ["Rotas Públicas Mercado"],
+                "parameters":[{
+                    "name":"pagamento_id",
+                    "in":"path",
+                    "description":"Id do pagamento",
+                    "required":true
+                }
+            ],
+            "requestBody": {
+                "content":{
+                    "application/json": {
+                        "schema":{
+                            "$ref": "#/components/schemas/RealizaPagamento"
+
+                        }
+                       
+                    }
+                }
+            },
+            "responses":{
+                "200":{
+                    "description": "Valor alterado"
+                },
+                "400":{
+                    "description": "informações inválidas"
+                }
+            }
+
+            }
+
+        },
+        "/events/:event_id/produtos":{
+            "get":{
+                "description":"Buscar Todos os produtos do evento",
+                "summary": "Buscar Todos os produtos do evento",
+                "tags":["Rotas Públicas Mercado"],
+                "parameters":[
+                    {
+                        "name": "event_id",
+                        "in":"params",
+                        "description": "id do evento",
+                        "required":true
+                        
+                    }
+                ],
+                "responses":{
+                    "200":{
+                    "description":"OK",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"array",
+                                "items":{
+                                "$ref": "#/components/schemas/getallproducts"
+                                }
+                            },
+                            "example":{
+                                
+                               "uuid_produto": "string",
+                                "nome": "string",
+                                "descricao": "string | null",
+                                "preco": "number",
+                                "estoque": "number",
+                                "imagem_url": "string | null",
+                                "uuid_evento": "string"
+                                
+                            }
+                        }
+                    }
+
+                    },
+                    "400":{
+                        "description":"Informações invalidas!"
+                    }
+                 
+                }
+            }
+
+        },
         "/event/:event_id/inscricao/:user_id":{
             "get":{
                 "description":"Buscar Informações do usuário no evento",
                 "summary": "Buscar Informações do usuário no evento",
-                "tags":["UserRoutes"],
+                "tags":["Rotas para usuários"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[
                     {
@@ -458,7 +752,7 @@
             "put":{
                 "summary":"Atualizar informações do participante",
                 "description":"Atualizar informações do participante",
-                "tags": ["UserRoutes"],
+                "tags": ["Rotas para usuários"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"user_id",
@@ -509,13 +803,39 @@
                     "description": "Erro ao atualizar dados do usuário."
                 }
             }
+            },
+            "delete":{
+                "summary":"Deletar usuário",
+                "description":"Deletar usuário",
+                "tags": ["Rotas para usuários"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters":[{
+                    "name":"user_id",
+                    "in":"params",
+                    "description":"Id do usuário",
+                    "required":true
+                }
+              
+               
+            ],
+            "responses":{
+                "200":{
+                    "description":"Usuario deletado"
+                    
+                    },
+                "400":{
+                    "description": "Informações invalidas!"
+                }
+            }
             }
         },
+     
+        
         "/admin/lote/:lote_id/inscricoes/:user_id":{
             "put":{
                 "summary":"Atualizar informações do pagamento",
                 "description":"Atualizar informações do pagamento",
-                "tags": ["UserRoutes"],
+                "tags": ["Rotas para usuários"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"user_id",
@@ -560,7 +880,7 @@
             "get":{
                 "summary":"Pegar informações sobre as finanças",
                 "description":"Pegar informações sobre as finanças",
-                "tags": ["EventRoutes"],
+                "tags": ["Rotas para eventos"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"event_id",
@@ -603,7 +923,7 @@
             "get":{
                 "summary":"Pegar o evento de acordo com o id de usuário",
                 "description":"Pegar o evento de acordo com o id de usuário",
-                "tags": ["EventRoutes"],
+                "tags": ["Rotas para eventos"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"user_id",
@@ -645,7 +965,7 @@
             "get":{
                 "summary":"Pegar os inscritos no evento",
                 "description":"Pegar os inscritos no evento",
-                "tags": ["EventRoutes"],
+                "tags": ["Rotas para eventos"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"id_evento",
@@ -689,7 +1009,7 @@
             "put":{
                 "summary":"Atualizar informações do Credenciamento",
                 "description":"Atualizar informações do Credenciamento",
-                "tags": ["EventRoutes"],
+                "tags": ["Rotas para eventos"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"user_id",
@@ -734,7 +1054,7 @@
             "get":{
                 "summary":"Pegar todas as atividades do evento",
                 "description":"Pegar todas as atividades do evento",
-                "tags": ["EventRoutes"],
+                "tags": ["Rotas para eventos"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"id_evento",
@@ -782,7 +1102,7 @@
             "get":{
                 "summary":"Pegar inscritos em atividade",
                 "description":"Pegar inscritos em atividade",
-                "tags": ["ActivityRoutes"],
+                "tags": ["Rota para atividades"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"id_atividade",
@@ -830,7 +1150,7 @@
             "get":{
                 "summary":"Pegar atividade por id",
                 "description":"Pegar atividade por id",
-                "tags": ["ActivityRoutes"],
+                "tags": ["Rota para atividades"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"atividade_id",
@@ -862,13 +1182,64 @@
                     }
                 }
 
+            },
+            "put":{
+                "summary":"Atualizar atividade por id",
+                "description":"Atualizar atividade por id",
+                "tags": ["Rota para atividades"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters":[{
+                    "name":"atividade_id",
+                    "in":"params",
+                    "description":"Id da atividade",
+                    "required":true
+                }
+                ],
+                "requestBody": {
+                    "content":{
+                        "application/json": {
+                            "schema":{
+                                "$ref": "#/components/schemas/AtualizarAtividade"
+    
+                            }
+                           
+                        }
+                    }
+                },
+                "responses":{
+                    "200":{
+                        "description":"Ok",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"array",
+                                    "items":{
+                                    "$ref": "#/components/schemas/AtualizarAtividadeRes"
+                                    }
+                                },
+                                "example":{
+                                    "atividade_id":"string",
+                                    "nome":"string",
+                                    "descricao":"string",
+                                    "tipo_atividade":"MINICURSO",
+                                    "max_participants":"130"
+                                }
+                            }
+                        }
+    
+                        },
+                    "400":{
+                        "description": "Informações inválidas!"
+                    }
+                }
+
             }
         },
         "/admin/atividades/:atividade_id/inscricoes/:user_id/frequencia":{
             "put":{
                 "summary":"Atualizar informações da presenca na atividade",
                 "description":"Atualizar informações da presenca na atividade",
-                "tags": ["ActivityRoutes"],
+                "tags": ["Rota para atividades"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"user_id",
@@ -910,7 +1281,7 @@
             "put":{
                 "summary":"Atualizar atividade",
                 "description":"Atualizar atividade",
-                "tags": ["ActivityRoutes"],
+                "tags": ["Rota para atividades"],
                 "security": [{ "bearerAuth": [] }],
                 "parameters":[{
                     "name":"user_id",
@@ -943,7 +1314,199 @@
             }
 
             }
+        },
+        "/admin/loja/produtos/:produto_id":{
+            "put":{
+                "summary":"Atualizar produto",
+                "description":"Atualizar produto",
+                "tags": ["Rota para o mercado"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters":[{
+                    "name":"produto_id",
+                    "in":"params",
+                    "description":"Id do produto",
+                    "required":true
+                }
+              
+               
+            ],
+            "requestBody": {
+                "content":{
+                    "application/json": {
+                        "schema":{
+                            "$ref": "#/components/schemas/AtualizarProduto"
+
+                        }
+                       
+                    }
+                }
+            },"responses":{
+                "200":{
+                    "description":"Ok",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"array",
+                                "items":{
+                                "$ref": "#/components/schemas/AtualizarProduto"
+                                }
+                            },
+                            "example":{
+                                "nome": "string",
+                                "descricao": "string",
+                                "estoque": 4,
+                                "preco": 2.00,
+                                "imagem_url": "string"
+
+                            }
+                        }
+                    }
+
+                    },
+                "400":{
+                    "description": "Informações inválidas!"
+                }
+            }
+
+            },
+            "get":{
+                "summary":"Buscar produto",
+                "description":"Buscar produto",
+                "tags": ["Rota para o mercado"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters":[{
+                    "name":"produto_id",
+                    "in":"params",
+                    "description":"Id do produto",
+                    "required":true
+                }
+              
+               
+            ],
+           "responses":{
+                "200":{
+                    "description":"Ok",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"array",
+                                "items":{
+                                "$ref": "#/components/schemas/AtualizarProduto"
+                                }
+                            },
+                            "example":{
+                                "nome": "string",
+                                "descricao": "string",
+                                "estoque": 4,
+                                "preco": 2.00,
+                                "imagem_url": "string"
+
+                            }
+                        }
+                    }
+
+                    },
+                "400":{
+                    "description": "Informações inválidas!"
+                }
+            }
+            }
+
+
+
+
+        },
+        "/admin/loja/produtos/:produto_id/compradores":{
+            "get":{
+                "summary":"Buscar compradores",
+                "description":"Buscar compradores",
+                "tags": ["Rota para o mercado"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters":[{
+                    "name":"produto_id",
+                    "in":"params",
+                    "description":"Id do produto",
+                    "required":true
+                }
+              
+               
+            ],
+           "responses":{
+                "200":{
+                    "description":"Ok",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"array",
+                                "items":{
+                                "$ref": "#/components/schemas/usuarios"
+                                }
+                            },
+                            "example":{
+                                "usuarios": "string"
+
+                            }
+                        }
+                    }
+
+                    },
+                "400":{
+                    "description": "Informações inválidas!"
+                }
+            }
+            }
+        },
+        "/admin/loja/usuario/:user_id/compras/produto/:produto_id":{
+            "get":{
+                "summary":"Buscar pedidos pelo  produto e usuário",
+                "description":"Buscar pedidos pelo  produto e usuário",
+                "tags": ["Rota para o mercado"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters":[{
+                    "name":"user_id",
+                    "in":"params",
+                    "description":"Id do usuário",
+                    "required":true
+                },
+                {
+                    "name":"produto_id",
+                    "in":"params",
+                    "description":"Id do produto",
+                    "required":true
+                }
+              
+               
+            ],
+           "responses":{
+                "200":{
+                    "description":"Ok",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"array",
+                                "items":{
+                                "$ref": "#/components/schemas/get_orders_by_product_and_user"
+                                }
+                            },
+                            "example":{
+                                "data_criacao": "data",
+                                "data_pagamento": "data",
+                                "status_pagamento": "status_pagamento",
+                                "quantidade": "number",
+                                "valor_total": "number"
+
+                            }
+                        }
+                    }
+
+                    },
+                "400":{
+                    "description": "Informações inválidas!"
+                }
+            }
+            }
         }
+
 
 
 
@@ -968,6 +1531,97 @@
                 }
                 
                 
+            },
+            "produtos":{
+                "type":"object",
+                "properties":{
+                    "uuid_produto":{
+                        "type":"string"
+                    },
+                    "quantidade":{
+                        "type":"number"
+                    }
+                }
+            },
+            "createorder_market":{
+                "type":"object",
+                "properties":{
+                    "email":{
+                        "type":"string"
+                    },
+                    "produtos":{
+                        "type":"array",
+                        "items":{
+                            "$ref": "#/components/schemas/produtos"
+                        }
+                    }
+                }
+            },
+            "get_orders_by_product_and_user":{
+                "type":"object",
+                "properties":{
+                    "data_criacao":{
+                        "type":"Date"
+                    },
+                    "data_pagamento":{
+                        "type":"Date"
+                    },
+                    "status_pagamento":{
+                        "type":"array",
+                        "items":{
+                            "$ref": "#/components/schemas/StatusPagamentoEnum"
+                        }
+                    },
+                    "quantidade":{
+                        "type":"number"
+                    },
+                    "valor_total":{
+                        "type":"number"
+                    }
+
+                }
+            },
+            "usuarios":{
+                "type":"object",
+                "properties":{
+                    "usuarios":{
+                        "type":"string"
+                    }
+                }
+            },
+
+            "AtualizarProduto":{
+                "type":"object",
+                "properties":{
+                    "nome":{
+                        "type":"string"
+                    },
+                    "descricao":{
+                        "type":"string"
+                    },
+                    "estoque":{
+                        "type":"number"
+                    },
+                    "preco":{
+                        "type":"number"
+                    },
+                    "imagem_url":{
+                        "type":"string"
+                    }
+                }
+            },
+            "GetLoteandUserID":{
+                "type":"object",
+                "properties":{
+                    "uuid_user":{
+                        "type":"string"
+                    },
+                    "uuid_lote":{
+                        "type":"string"
+
+                    }
+                }
+
             },
             "atividade_put":{
                 "type":"object",
@@ -1169,6 +1823,149 @@
                     
             }
         },
+        "AtualizarAtividade":{
+            "type":"object",
+            "properties":{
+                "nome":{
+                    "type":"string"
+                },
+                "descricao":{
+                    "type":"string"
+                },
+                "tipo_atividade":{
+                    "type":"array",
+                    "items":{
+                      "$ref": "#/components/schemas/Tipo_Atividade"
+                    }
+                },
+                "max_participants":{
+                    "type":"number"
+                }
+            }
+
+        },
+        "produtos_market":{
+            "type":"object",
+            "properties":{
+                "uuid_produto":{
+                    "type":"string"
+                },
+                "nome":{
+                    "type":"string"
+                },
+                "preco":{
+                    "type":"number"
+                },
+                "imagem_url":{
+                    "type":"string"
+                }
+            }
+        },
+        "getallproducts":{
+            "type":"object",
+            "properties":{
+                "uuid_produto":{
+                    "type":"string"
+                },
+                "nome":{
+                    "type":"string"
+                },
+                "descricao":{
+                    "type":"string"
+                },
+                "preco":{
+                    "type":"number"
+                },
+                "estoque":{
+                    "type":"number"
+                },
+                "imagem_url":{
+                    "type":"string"
+                },
+                "uuid_evento":{
+                    "type":"string"
+                }
+            }
+        },
+        "pagamento_market":{
+            "type":"object",
+            "properties":{
+                "usuario":{
+                    "type":"array",
+                    "items":{
+                        "$ref": "#/components/schemas/getActivityById"
+                    }
+                },
+                "uuid_pagamento":{
+                    "type":"string"
+                },
+                "uuid_user":{
+                    "type":"string"
+                },
+                "id_payment_mercado_pago":{
+                    "type":"string"
+                },
+                "valor_total":{
+                    "type":"number"
+                },
+                "status_pagamento":{
+                    "type":"array",
+                    "items":{
+                        "$ref": "#/components/schemas/StatusPagamentoEnum"
+                    }
+                },
+                "data_criacao":{
+                    "type":"Date"
+                },
+                "vendas":{
+                    "type":"array",
+                    "items":{
+                        "$ref": "#/components/schemas/vendas"
+                    }
+                }
+
+
+
+            }
+        },
+        "vendas":{
+            "type":"object",
+            "properties":{
+                "quantidade":{
+                    "type":"number"
+                },
+                "produto":{
+                    "type":"array",
+                    "items":{
+                       "$ref": "#/components/schemas/produtos_market"
+                    }
+                }
+            }
+        },
+        "AtualizarAtividadeRes":{
+            "type":"object",
+            "properties":{
+                "atividade_id":{
+                    "type":"string"
+                },
+                "nome":{
+                    "type":"string"
+                },
+                "descricao":{
+                    "type":"string"
+                },
+                "tipo_atividade":{
+                    "type":"array",
+                    "items":{
+                      "$ref": "#/components/schemas/Tipo_Atividade"
+                    }
+                },
+                "max_participants":{
+                    "type":"number"
+                }
+            }
+
+        },
 
            
             "RealizaPagamento":{
@@ -1314,6 +2111,39 @@
             
        
     },
+    "response_market":{
+        "type":"object",
+        "properties":{
+            "uuid_pagamento":{
+                "type":"string"
+            },
+            "uuid_user":{
+                "type":"string"
+            },
+            "id_payment_mercado_pago":{
+                "type":"string"
+            },
+            "valor_total":{
+                "type":"number"
+            },
+            "status_pagamento":{
+                "type":"array",
+                "items":{
+                    "$ref": "#/components/schemas/StatusPagamentoEnum"
+                }
+            },
+            "data_pagamento":{
+                "type":"Date"
+            },
+            "data_criacao":{
+                "type":"Date"
+            }
+            
+        }
+        
+        
+
+    },
 
 
     "user_inscricao":{
@@ -1401,6 +2231,38 @@
              
     
     },
+    "GetFinancialInfo":{
+        "type":"object",
+        "properties":{
+            "uuid_user":{
+                "type":"string"
+            },
+            "nome":{
+                "type":"string"
+            },
+            "email":{
+                "type":"string"
+            },
+            "mercado_pago_id":{
+                "type":"string"
+            },
+            "status_pagamento":{
+                "type":"array",
+                "items":{
+                    "$ref": "#/components/schemas/StatusPagamentoEnum"
+                }
+            },
+            "status":{
+                "type":"string"
+            },
+            "date_created":{
+                "type":"string"
+            },
+            "data_approved":{
+                "type":"string"
+            }
+        }
+    },
     "inscricao":{
         "type":"object",
         "properties":{
@@ -1435,6 +2297,15 @@
           
         }
     },
+    "email":{
+        "type":"object",
+        "properties":{
+            "email":{
+                "type":"string"
+            }
+        }
+    },
+ 
     "atividades":{
         "type":"object",
         "properties":{
