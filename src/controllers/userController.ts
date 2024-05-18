@@ -84,7 +84,6 @@ export async function realizarPagamento(req: Request, res: Response) {
         status &&
         user_inscricao?.status_pagamento !== StatusPagamento.GRATUITO
       ) {
-        console.log(status, user_inscricao?.status_pagamento);
         await changeStatusPagamento(user_id, lote_id, status);
       }
     }
