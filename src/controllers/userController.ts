@@ -10,10 +10,13 @@ import {
   changeStatusPagamento,
   findLoteIdAndUserIdByEmail,
   findUserInscricaoByEventId,
-  findUserInscricaoById
+  findUserInscricaoById,
 } from "../repositories/userInscricaoRepository";
 import { findUserByEmail, findUserById } from "../repositories/userRepository";
-import { getPayment, getPaymentStatusForInscricao } from "../services/payments/getPayment";
+import {
+  getPayment,
+  getPaymentStatusForInscricao,
+} from "../services/payments/getPayment";
 import { checkPassword } from "../services/user/checkPassword";
 import { deleteUserByUserId } from "../services/user/deleteUserByUserId";
 
@@ -72,14 +75,17 @@ export async function realizarPagamento(req: Request, res: Response) {
     const { action } = req.body;
 
     if (action === "payment.updated") {
-      const status = await getPaymentStatusForInscricao(user_id, lote_id);
+      const [status, user_inscricao] = await Promise.all([
+        getPaymentStatusForInscricao(user_id, lote_id),
+        findUserInscricaoById(user_id, lote_id),
+      ]);
 
-      if(status === StatusPagamento.REALIZADO){
-        await changeStatusPagamento(user_id, lote_id, StatusPagamento.REALIZADO);
-      }else if(status === StatusPagamento.EXPIRADO){
-        await changeStatusPagamento(user_id, lote_id, StatusPagamento.EXPIRADO);
+      if (
+        status &&
+        user_inscricao?.status_pagamento !== StatusPagamento.GRATUITO
+      ) {
+        await changeStatusPagamento(user_id, lote_id, status);
       }
-      
     }
 
     return res.status(200).send("Valor alterado");
@@ -120,7 +126,7 @@ export async function getUserInscricao(req: Request, res: Response) {
   try {
     const { user_id, lote_id } = req.params;
 
-    const user_inscricao = await findUserInscricaoById(user_id, lote_id)
+    const user_inscricao = await findUserInscricaoById(user_id, lote_id);
 
     const payment = await getPayment(user_inscricao!.id_payment_mercado_pago);
 
