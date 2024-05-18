@@ -85,7 +85,8 @@ export async function realizarPagamentoVenda(req: Request, res: Response) {
         findUserInscricaoByMercadoPagoId(pagamento_id)
       ]);
 
-      if (status && user_inscricao.status_pagamento !== StatusPagamento.GRATUITO) {
+      if (status && user_inscricao?.status_pagamento !== StatusPagamento.GRATUITO) {
+        console.log(status, user_inscricao?.status_pagamento)
         await changeVendaStatusPagamento(pagamento_id, status);
       }
     }
